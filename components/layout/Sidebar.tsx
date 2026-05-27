@@ -34,8 +34,8 @@ export default function Sidebar({ role, name }: SidebarProps) {
       case "ADMIN":
         return [
           { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-          { name: "Data Kurikulum", href: "/admin/kurikulum", icon: BookOpen },
-          { name: "Laporan CPL", href: "/admin/laporan", icon: FileBarChart },
+          { name: "Data Kurikulum", href: "/admin/data-kurikulum", icon: BookOpen },
+          { name: "Laporan CPL", href: "/admin/laporan-cpl", icon: FileBarChart },
         ];
       case "DOSEN":
         return [

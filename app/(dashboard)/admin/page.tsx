@@ -2,30 +2,81 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import RadarChartCPL from "@/components/charts/RadarChart";
-import { Users, BookOpen, FileCheck2, Target, Upload, Download, Calendar } from "lucide-react";
+import { Users, BookOpen, Target, FileCheck2, TrendingUp } from "lucide-react";
 
 export default function AdminDashboard() {
   const stats = [
-    { title: "Total CPL Evaluated", value: "12", sub: "75% Complete", icon: Target, iconBg: "#ede9fe", iconColor: "#7c3aed", trend: "+2 baru", trendUp: true },
-    { title: "Total PI Mapped", value: "48", sub: "Semua aktif", icon: BookOpen, iconBg: "#dbeafe", iconColor: "#2563eb", trend: "+5 baru", trendUp: true },
-    { title: "Total CPMK Defined", value: "156", sub: "4 Perlu Review", icon: FileCheck2, iconBg: "#d1fae5", iconColor: "#059669", trend: "4 review", trendUp: false },
-    { title: "Total Mahasiswa", value: "1,248", sub: "Angkatan 2020–2024", icon: Users, iconBg: "#fef3c7", iconColor: "#d97706", trend: "+64 baru", trendUp: true },
+    {
+      title: "Total CPL Evaluated",
+      value: "12",
+      sub: "75% Complete",
+      icon: Target,
+      iconBg: "#ede9fe",
+      iconColor: "#7c3aed",
+      trend: "+2 bulan ini",
+      trendUp: true,
+    },
+    {
+      title: "Total PI Mapped",
+      value: "48",
+      sub: "Semua aktif",
+      icon: BookOpen,
+      iconBg: "#dbeafe",
+      iconColor: "#2563eb",
+      trend: "+5 baru",
+      trendUp: true,
+    },
+    {
+      title: "Total CPMK Defined",
+      value: "156",
+      sub: "4 Perlu Review",
+      icon: FileCheck2,
+      iconBg: "#d1fae5",
+      iconColor: "#059669",
+      trend: "4 perlu review",
+      trendUp: false,
+    },
+    {
+      title: "Total Mahasiswa",
+      value: "1,248",
+      sub: "Angkatan 2020–2024",
+      icon: Users,
+      iconBg: "#fef3c7",
+      iconColor: "#d97706",
+      trend: "+64 baru",
+      trendUp: true,
+    },
   ];
 
-  const deadlines = [
-    { date: "OCT\n15", title: "Finalize Semester PI", sub: "Kaprodi Approval Required", urgent: false },
-    { date: "NOV\n01", title: "Curriculum Audit", sub: "Kaprodi Approval Required", urgent: false },
+  const kurikulumData = [
+    { kode: "TI-001", nama: "Data Structures", cpl: "CPL 01, 02, 03, 04", pi: 4, status: "Active" },
+    { kode: "TI-002", nama: "Artificial Intelligence", cpl: "CPL 01, 05, 06", pi: 6, status: "In Progress" },
+    { kode: "TI-003", nama: "Database Systems", cpl: "CPL 01, 02", pi: 3, status: "Needs Review" },
+    { kode: "TI-004", nama: "Software Engineering", cpl: "CPL 03, 04, 05", pi: 5, status: "Active" },
   ];
+
+  const statusStyle = (status: string) => {
+    if (status === "Active") return { bg: "#d1fae5", color: "#059669" };
+    if (status === "In Progress") return { bg: "#fef3c7", color: "#d97706" };
+    return { bg: "#fee2e2", color: "#dc2626" };
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>Dashboard Overview</h2>
-        <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>Academic profile and CPL management overview.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>Dashboard Overview</h2>
+          <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>Academic performance and CPL management overview.</p>
+        </div>
+        <button
+          className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
+          style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)", boxShadow: "0 4px 14px rgba(67,97,238,0.3)" }}
+        >
+          <TrendingUp className="w-4 h-4" />
+          Academic Year 2025/2026
+        </button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         {stats.map((s, i) => (
           <Card key={i}>
@@ -34,7 +85,10 @@ export default function AdminDashboard() {
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: s.iconBg }}>
                   <s.icon className="w-5 h-5" style={{ color: s.iconColor }} />
                 </div>
-                <span className="text-xs font-medium px-2 py-1 rounded-lg" style={{ background: s.trendUp ? "#d1fae5" : "#fee2e2", color: s.trendUp ? "#059669" : "#dc2626" }}>
+                <span
+                  className="text-xs font-medium px-2 py-1 rounded-lg"
+                  style={{ background: s.trendUp ? "#d1fae5" : "#fee2e2", color: s.trendUp ? "#059669" : "#dc2626" }}
+                >
                   {s.trend}
                 </span>
               </div>
@@ -47,101 +101,81 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        {/* Chart */}
         <Card className="xl:col-span-2">
           <CardHeader>
-            <CardTitle>Radar CPL Mahasiswa</CardTitle>
+            <CardTitle>Curriculum Mapping</CardTitle>
+            <a href="#" className="text-sm font-semibold" style={{ color: "#4361ee" }}>See all →</a>
           </CardHeader>
           <CardContent>
-            <div style={{ height: "320px" }}>
-              <RadarChartCPL />
+            <div className="w-full overflow-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
+                    {["Course Name", "CPL Ref.", "PI Count", "Status", "Action"].map((h) => (
+                      <th key={h} className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {kurikulumData.map((row, i) => {
+                    const st = statusStyle(row.status);
+                    return (
+                      <tr key={i} style={{ borderBottom: "1px solid #f8faff" }}>
+                        <td className="py-3.5 pr-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style={{ background: "#ede9fe", color: "#7c3aed" }}>
+                              {row.kode.split("-")[1]}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm" style={{ color: "#1a1d2e" }}>{row.nama}</p>
+                              <p className="text-xs" style={{ color: "#94a3b8" }}>{row.kode}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 pr-4 text-xs" style={{ color: "#64748b" }}>{row.cpl}</td>
+                        <td className="py-3.5 pr-4">
+                          <span className="text-xs font-medium px-2 py-1 rounded-lg" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                            {row.pi} Indicators
+                          </span>
+                        </td>
+                        <td className="py-3.5 pr-4">
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: st.bg, color: st.color }}>
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5">
+                          <button className="text-xs font-semibold" style={{ color: "#4361ee" }}>Edit</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>
 
-        {/* Right Panel */}
-        <div className="space-y-5">
-          {/* Staff Registration */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Staff Registration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-xs mb-1.5 font-medium" style={{ color: "#64748b" }}>Email Address</p>
-                <input
-                  type="email"
-                  placeholder="staff@uns.ac.id"
-                  className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none"
-                  style={{ background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#1a1d2e" }}
-                />
+        <Card>
+          <CardHeader>
+            <CardTitle>Radar CPL Lulusan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div style={{ height: "300px", width: "100%" }}>
+              <RadarChartCPL />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-xl p-3 text-center" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+                <p className="text-2xl font-bold" style={{ color: "#059669" }}>8</p>
+                <p className="text-xs font-medium mt-0.5" style={{ color: "#059669" }}>CPL Tercapai</p>
               </div>
-              <div>
-                <p className="text-xs mb-1.5 font-medium" style={{ color: "#64748b" }}>Role Assignment</p>
-                <select className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none" style={{ background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#1a1d2e" }}>
-                  <option>Administrator</option>
-                  <option>Dosen</option>
-                </select>
+              <div className="rounded-xl p-3 text-center" style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
+                <p className="text-2xl font-bold" style={{ color: "#dc2626" }}>2</p>
+                <p className="text-xs font-medium mt-0.5" style={{ color: "#dc2626" }}>Belum Tercapai</p>
               </div>
-              <button className="w-full py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)" }}>
-                Register Staff
-              </button>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Deadlines */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Deadlines</CardTitle>
-              <Calendar className="w-4 h-4" style={{ color: "#94a3b8" }} />
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {deadlines.map((d, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "#f8faff", border: "1px solid #e9edf4" }}>
-                  <div className="text-center min-w-[40px]">
-                    {d.date.split("\n").map((part, j) => (
-                      <p key={j} className={j === 0 ? "text-xs font-bold" : "text-lg font-extrabold"} style={{ color: "#4361ee", lineHeight: 1.1 }}>{part}</p>
-                    ))}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: "#1a1d2e" }}>{d.title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "#94a3b8" }}>{d.sub}</p>
-                  </div>
-                </div>
-              ))}
-              <button className="w-full text-sm font-semibold text-center mt-1" style={{ color: "#4361ee" }}>
-                View Full Calendar →
-              </button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Aksi Cepat Admin</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { icon: Upload, label: "Import Data Kurikulum", sub: "Upload file Excel (.xlsx)", color: "#4361ee", bg: "#eef2ff" },
-              { icon: Upload, label: "Import Data Pengampu", sub: "Upload file Excel (.xlsx)", color: "#7c3aed", bg: "#ede9fe" },
-              { icon: Download, label: "Export Laporan CPL", sub: "Download PDF untuk Akreditasi", color: "#059669", bg: "#d1fae5" },
-            ].map((action, i) => (
-              <button key={i} className="flex items-center gap-4 p-4 rounded-xl text-left transition-all hover:shadow-md" style={{ background: action.bg, border: `1.5px solid ${action.bg}` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: action.color }}>
-                  <action.icon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: "#1a1d2e" }}>{action.label}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "#64748b" }}>{action.sub}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
