@@ -328,7 +328,25 @@ async function main() {
     });
   }
 
-  // Create CPL
+  // Create Admin with Dosen profile
+  const admin2User = await prisma.user.create({
+    data: {
+      name: 'Siti Aminah, S.T., M.Kom.',
+      email: 'siti.admin@staff.uns.ac.id',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  });
+
+  await prisma.dosen.create({
+    data: {
+      nidn: '0618109103',
+      nip: '199118180003',
+      userId: admin2User.id,
+    },
+  });
+
+  // Create CPL (12 CPL sesuai standar IABEE)
   const cpl1 = await prisma.cPL.create({
     data: {
       kode: 'CPL-01',
@@ -343,7 +361,77 @@ async function main() {
     },
   });
 
-  // Create PI
+  const cpl3 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-03',
+      deskripsi: 'Kemampuan merancang sistem, komponen, atau proses untuk memenuhi kebutuhan',
+    },
+  });
+
+  const cpl4 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-04',
+      deskripsi: 'Kemampuan bekerja dalam tim multidisiplin',
+    },
+  });
+
+  const cpl5 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-05',
+      deskripsi: 'Kemampuan mengidentifikasi, merumuskan, dan menyelesaikan masalah rekayasa',
+    },
+  });
+
+  const cpl6 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-06',
+      deskripsi: 'Pemahaman tanggung jawab profesional dan etika',
+    },
+  });
+
+  const cpl7 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-07',
+      deskripsi: 'Kemampuan berkomunikasi secara efektif',
+    },
+  });
+
+  const cpl8 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-08',
+      deskripsi: 'Pemahaman dampak solusi rekayasa dalam konteks global dan sosial',
+    },
+  });
+
+  const cpl9 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-09',
+      deskripsi: 'Kemampuan belajar sepanjang hayat',
+    },
+  });
+
+  const cpl10 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-10',
+      deskripsi: 'Pengetahuan tentang isu kontemporer',
+    },
+  });
+
+  const cpl11 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-11',
+      deskripsi: 'Kemampuan menggunakan teknik, keterampilan, dan peralatan modern',
+    },
+  });
+
+  const cpl12 = await prisma.cPL.create({
+    data: {
+      kode: 'CPL-12',
+      deskripsi: 'Kemampuan menerapkan prinsip manajemen proyek',
+    },
+  });
+
+  // Create PI (Performance Indicators)
   const pi1 = await prisma.pI.create({
     data: {
       kode: 'PI-01-01',
@@ -354,16 +442,64 @@ async function main() {
 
   const pi2 = await prisma.pI.create({
     data: {
+      kode: 'PI-01-02',
+      deskripsi: 'Mampu menerapkan metode matematika untuk menyelesaikan masalah',
+      cplId: cpl1.id,
+    },
+  });
+
+  const pi3 = await prisma.pI.create({
+    data: {
       kode: 'PI-02-01',
       deskripsi: 'Mampu merancang eksperimen untuk menguji hipotesis',
       cplId: cpl2.id,
     },
   });
 
-  // Create CPMK
+  const pi4 = await prisma.pI.create({
+    data: {
+      kode: 'PI-02-02',
+      deskripsi: 'Mampu menganalisis dan menginterpretasi data eksperimen',
+      cplId: cpl2.id,
+    },
+  });
+
+  const pi5 = await prisma.pI.create({
+    data: {
+      kode: 'PI-03-01',
+      deskripsi: 'Mampu merancang sistem informasi sesuai kebutuhan',
+      cplId: cpl3.id,
+    },
+  });
+
+  const pi6 = await prisma.pI.create({
+    data: {
+      kode: 'PI-04-01',
+      deskripsi: 'Mampu berkolaborasi dalam tim proyek',
+      cplId: cpl4.id,
+    },
+  });
+
+  const pi7 = await prisma.pI.create({
+    data: {
+      kode: 'PI-05-01',
+      deskripsi: 'Mampu mengidentifikasi dan menyelesaikan masalah kompleks',
+      cplId: cpl5.id,
+    },
+  });
+
+  const pi8 = await prisma.pI.create({
+    data: {
+      kode: 'PI-06-01',
+      deskripsi: 'Memahami kode etik profesi dan tanggung jawab profesional',
+      cplId: cpl6.id,
+    },
+  });
+
+  // Create CPMK (Capaian Pembelajaran Mata Kuliah)
   await prisma.cPMK.create({
     data: {
-      kode: 'CPMK-01',
+      kode: 'CPMK-TI2023-01',
       deskripsi: 'Mahasiswa mampu memahami konsep basis data relasional',
       piId: pi1.id,
       mkId: mk1.id,
@@ -372,16 +508,79 @@ async function main() {
 
   await prisma.cPMK.create({
     data: {
-      kode: 'CPMK-02',
+      kode: 'CPMK-TI2023-02',
       deskripsi: 'Mahasiswa mampu merancang skema basis data',
-      piId: pi2.id,
+      piId: pi3.id,
       mkId: mk1.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI2023-03',
+      deskripsi: 'Mahasiswa mampu mengimplementasikan query SQL',
+      piId: pi5.id,
+      mkId: mk1.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI1014-01',
+      deskripsi: 'Mahasiswa mampu memahami konsep algoritma dan struktur data',
+      piId: pi1.id,
+      mkId: mk2.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI1014-02',
+      deskripsi: 'Mahasiswa mampu mengimplementasikan algoritma dalam bahasa pemrograman',
+      piId: pi2.id,
+      mkId: mk2.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI3055-01',
+      deskripsi: 'Mahasiswa mampu memahami konsep kecerdasan buatan',
+      piId: pi1.id,
+      mkId: mk3.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI3055-02',
+      deskripsi: 'Mahasiswa mampu menerapkan algoritma machine learning',
+      piId: pi4.id,
+      mkId: mk3.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI4012-01',
+      deskripsi: 'Mahasiswa mampu memahami prinsip manajemen proyek',
+      piId: pi6.id,
+      mkId: mk4.id,
+    },
+  });
+
+  await prisma.cPMK.create({
+    data: {
+      kode: 'CPMK-TI4012-02',
+      deskripsi: 'Mahasiswa mampu mengelola tim proyek',
+      piId: pi7.id,
+      mkId: mk4.id,
     },
   });
 
   console.log('✅ Seed completed successfully!');
   console.log('\n📊 Summary:');
-  console.log('- Users: 13 (1 Kaprodi, 1 Admin, 2 Dosen, 10 Mahasiswa)');
+  console.log('- Users: 14 (1 Kaprodi, 2 Admin, 2 Dosen, 10 Mahasiswa)');
   console.log('- Mata Kuliah: 4');
   console.log('- Kelas: 4');
   console.log('- Pengampu: 4 (Dosen 1 mengampu semua kelas)');
@@ -392,10 +591,12 @@ async function main() {
   console.log('  - Kelas 4 (Manajemen Proyek): 5 mahasiswa');
   console.log('- Komponen Nilai: 3 (UTS, UAS, Tugas) for Kelas 1');
   console.log('- Nilai Mahasiswa: 24 records');
-  console.log('- CPL: 2');
-  console.log('- PI: 2');
-  console.log('- CPMK: 2');
+  console.log('- CPL: 12 (sesuai standar IABEE)');
+  console.log('- PI: 8 (Performance Indicators)');
+  console.log('- CPMK: 9 (tersebar di 4 mata kuliah)');
   console.log('\n🔑 Login credentials:');
+  console.log('- Kaprodi: kaprodi@staff.uns.ac.id / password123');
+  console.log('- Admin: admin@staff.uns.ac.id / password123');
   console.log('- Dosen: dosen@staff.uns.ac.id / password123');
   console.log('  → Mengampu 4 mata kuliah:');
   console.log('    1. TI2023 - Sistem Basis Data (8 mhs) ✅ Ada nilai');

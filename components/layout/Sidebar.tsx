@@ -7,7 +7,6 @@ import {
   Users,
   BookOpen,
   FileBarChart,
-  Settings,
   LogOut,
   GraduationCap,
   ClipboardList,
@@ -28,10 +27,9 @@ export default function Sidebar({ role, name }: SidebarProps) {
       case "KAPRODI":
         return [
           { name: "Dashboard", href: "/kaprodi", icon: LayoutDashboard },
-          { name: "Manajemen Admin", href: "/kaprodi/admin", icon: Users },
-          { name: "Data Kurikulum", href: "/kaprodi/kurikulum", icon: BookOpen },
-          { name: "Laporan CPL", href: "/kaprodi/laporan", icon: FileBarChart },
-          { name: "Pengaturan", href: "/kaprodi/pengaturan", icon: Settings },
+          { name: "Manajemen Admin", href: "/kaprodi/manajemen-admin", icon: Users },
+          { name: "Data Kurikulum", href: "/kaprodi/data-kurikulum", icon: BookOpen },
+          { name: "Laporan CPL", href: "/kaprodi/laporan-cpl", icon: FileBarChart },
         ];
       case "ADMIN":
         return [
@@ -159,27 +157,8 @@ export default function Sidebar({ role, name }: SidebarProps) {
         </ul>
       </div>
 
-      {/* Help & Logout */}
-      <div className="p-3 border-t border-white/10 space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-2" style={{ color: "rgba(248,250,252,0.3)" }}>
-          Lainnya
-        </p>
-        <Link
-          href="/kaprodi/pengaturan"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
-          style={{ color: "rgba(248,250,252,0.6)" }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)";
-            (e.currentTarget as HTMLElement).style.color = "#f8fafc";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "rgba(248,250,252,0.6)";
-          }}
-        >
-          <Settings className="shrink-0" style={{ width: "1.1rem", height: "1.1rem" }} />
-          <span className="text-sm font-medium">Pengaturan</span>
-        </Link>
+      {/* Logout */}
+      <div className="p-3 border-t border-white/10">
         <button
           onClick={() => {
             document.cookie =
