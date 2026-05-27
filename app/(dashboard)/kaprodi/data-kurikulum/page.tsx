@@ -200,3 +200,278 @@ export default function DataKurikulumPage() {
           </Card>
         ))}
       </div>
+
+      <div className="flex gap-2 border-b" style={{ borderColor: "#e2e8f0" }}>
+        {[
+          { key: "cpl", label: "CPL" },
+          { key: "pi", label: "PI" },
+          { key: "cpmk", label: "CPMK" },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as any)}
+            className={`px-4 py-3 text-sm font-semibold transition-colors ${activeTab === tab.key ? "border-b-2" : ""}`}
+            style={{
+              color: activeTab === tab.key ? "#4361ee" : "#94a3b8",
+              borderColor: activeTab === tab.key ? "#4361ee" : "transparent",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <Card>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              {activeTab === "cpl" && (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Kode</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Deskripsi</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>PI</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cplData.map((cpl) => (
+                      <tr key={cpl.id} style={{ borderBottom: "1px solid #f8faff" }}>
+                        <td className="py-4">
+                          <span className="px-3 py-1 rounded-lg font-semibold text-sm" style={{ background: "#ede9fe", color: "#7c3aed" }}>
+                            {cpl.kode}
+                          </span>
+                        </td>
+                        <td className="py-4" style={{ color: "#1a1d2e" }}>{cpl.deskripsi}</td>
+                        <td className="py-4">
+                          <span className="px-2 py-1 rounded-lg text-xs font-medium" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                            {cpl._count.pi} PI
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => handleEdit(cpl)} className="p-2 rounded-lg hover:bg-blue-50">
+                              <Edit2 className="w-4 h-4" style={{ color: "#4361ee" }} />
+                            </button>
+                            <button onClick={() => handleDelete(cpl.id)} className="p-2 rounded-lg hover:bg-red-50">
+                              <Trash2 className="w-4 h-4" style={{ color: "#dc2626" }} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {activeTab === "pi" && (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Kode</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>CPL</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Deskripsi</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>CPMK</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {piData.map((pi) => (
+                      <tr key={pi.id} style={{ borderBottom: "1px solid #f8faff" }}>
+                        <td className="py-4">
+                          <span className="px-3 py-1 rounded-lg font-semibold text-sm" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                            {pi.kode}
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <span className="px-2 py-1 rounded-lg text-xs font-medium" style={{ background: "#ede9fe", color: "#7c3aed" }}>
+                            {pi.cpl.kode}
+                          </span>
+                        </td>
+                        <td className="py-4" style={{ color: "#1a1d2e" }}>{pi.deskripsi}</td>
+                        <td className="py-4">
+                          <span className="px-2 py-1 rounded-lg text-xs font-medium" style={{ background: "#d1fae5", color: "#059669" }}>
+                            {pi._count.cpmk} CPMK
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => handleEdit(pi)} className="p-2 rounded-lg hover:bg-blue-50">
+                              <Edit2 className="w-4 h-4" style={{ color: "#4361ee" }} />
+                            </button>
+                            <button onClick={() => handleDelete(pi.id)} className="p-2 rounded-lg hover:bg-red-50">
+                              <Trash2 className="w-4 h-4" style={{ color: "#dc2626" }} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {activeTab === "cpmk" && (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Kode</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Mata Kuliah</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>PI</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Deskripsi</th>
+                      <th className="pb-3 text-left text-xs font-semibold uppercase" style={{ color: "#94a3b8" }}>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cpmkData.map((cpmk) => (
+                      <tr key={cpmk.id} style={{ borderBottom: "1px solid #f8faff" }}>
+                        <td className="py-4">
+                          <span className="px-3 py-1 rounded-lg font-semibold text-sm" style={{ background: "#d1fae5", color: "#059669" }}>
+                            {cpmk.kode}
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <div>
+                            <p className="font-semibold text-sm" style={{ color: "#1a1d2e" }}>{cpmk.mataKuliah.nama}</p>
+                            <p className="text-xs" style={{ color: "#94a3b8" }}>{cpmk.mataKuliah.kode}</p>
+                          </div>
+                        </td>
+                        <td className="py-4">
+                          <span className="px-2 py-1 rounded-lg text-xs font-medium" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                            {cpmk.pi.kode}
+                          </span>
+                        </td>
+                        <td className="py-4" style={{ color: "#1a1d2e" }}>{cpmk.deskripsi}</td>
+                        <td className="py-4">
+                          <div className="flex gap-2">
+                            <button onClick={() => handleEdit(cpmk)} className="p-2 rounded-lg hover:bg-blue-50">
+                              <Edit2 className="w-4 h-4" style={{ color: "#4361ee" }} />
+                            </button>
+                            <button onClick={() => handleDelete(cpmk.id)} className="p-2 rounded-lg hover:bg-red-50">
+                              <Trash2 className="w-4 h-4" style={{ color: "#dc2626" }} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold" style={{ color: "#1a1d2e" }}>
+                {editingItem ? `Edit ${activeTab.toUpperCase()}` : `Tambah ${activeTab.toUpperCase()}`}
+              </h3>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-1 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>Kode</label>
+                <input
+                  type="text"
+                  value={formData.kode}
+                  onChange={(e) => setFormData({ ...formData, kode: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder={activeTab === "cpl" ? "CPL-01" : activeTab === "pi" ? "PI-01-01" : "CPMK-01"}
+                  required
+                />
+              </div>
+
+              {activeTab === "pi" && (
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>CPL</label>
+                  <select
+                    value={formData.cplId}
+                    onChange={(e) => setFormData({ ...formData, cplId: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    required
+                  >
+                    <option value="">Pilih CPL</option>
+                    {cplOptions.map((cpl) => (
+                      <option key={cpl.id} value={cpl.id}>{cpl.kode} - {cpl.deskripsi}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {activeTab === "cpmk" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>Mata Kuliah</label>
+                    <select
+                      value={formData.mkId}
+                      onChange={(e) => setFormData({ ...formData, mkId: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      required
+                    >
+                      <option value="">Pilih Mata Kuliah</option>
+                      {mkOptions.map((mk) => (
+                        <option key={mk.id} value={mk.id}>{mk.kode} - {mk.nama}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>PI</label>
+                    <select
+                      value={formData.piId}
+                      onChange={(e) => setFormData({ ...formData, piId: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      required
+                    >
+                      <option value="">Pilih PI</option>
+                      {piOptions.map((pi) => (
+                        <option key={pi.id} value={pi.id}>{pi.kode} - {pi.deskripsi}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>Deskripsi</label>
+                <textarea
+                  value={formData.deskripsi}
+                  onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowModal(false); resetForm(); }}
+                  className="flex-1 px-4 py-2 rounded-lg border font-medium"
+                  style={{ color: "#64748b", borderColor: "#e2e8f0" }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 rounded-lg text-white font-semibold"
+                  style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)" }}
+                >
+                  {editingItem ? "Update" : "Tambah"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
