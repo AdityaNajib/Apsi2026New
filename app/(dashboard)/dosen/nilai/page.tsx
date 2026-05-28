@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { ArrowLeft, Save, Plus, Edit2, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Save, Plus, Edit2, Trash2, Users, BookOpen } from "lucide-react";
+
+interface MataKuliah {
+  kelasId: string;
+  kode: string;
+  nama: string;
+  kelas: string;
+  jumlahMahasiswa: number;
+  statusNilai: string;
+}
 
 interface Mahasiswa {
   id: string;
@@ -23,6 +32,71 @@ interface NilaiData {
   [mahasiswaId: string]: {
     [komponenId: string]: number | null;
   };
+}
+
+function SelectMataKuliahCard() {
+  const router = useRouter();
+  const [mataKuliah, setMataKuliah] = useState<MataKuliah[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchMataKuliah();
+  }, []);
+
+  const fetchMataKuliah = async () => {
+    try {
+      const res = await fetch("/api/dosen/mata-kuliah");
+      const data = await res.json();
+      setMataKuliah(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {mataKuliah.map((mk) => (
+        <Card 
+          key={mk.kelasId} 
+          className="cursor-pointer hover:shadow-lg transition-all" 
+          onClick={() => router.push(`/dosen/nilai?kelasId=${mk.kelasId}`)}
+        >
+          <CardContent className="p-0">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "#ede9fe" }}>
+                <BookOpen className="w-6 h-6" style={{ color: "#7c3aed" }} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg" style={{ color: "#1a1d2e" }}>{mk.nama}</h3>
+                <p className="text-sm" style={{ color: "#94a3b8" }}>{mk.kode} - Kelas {mk.kelas}</p>
+                <div className="flex items-center gap-4 mt-2">
+                  <span className="text-xs px-2 py-1 rounded-lg" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                    {mk.jumlahMahasiswa} Mahasiswa
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-lg" style={{ 
+                    background: mk.statusNilai === "Siap Input Nilai" ? "#d1fae5" : "#fef3c7",
+                    color: mk.statusNilai === "Siap Input Nilai" ? "#059669" : "#d97706"
+                  }}>
+                    {mk.statusNilai}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 }
 
 function NilaiPageContent() {
@@ -221,32 +295,11 @@ function NilaiPageContent() {
             Input Nilai Mahasiswa
           </h2>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Kelola komponen nilai dan input nilai mahasiswa
+            Pilih mata kuliah untuk input nilai
           </p>
         </div>
-        <Card>
-          <CardContent className="text-center py-12">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "#fee2e2" }}>
-              <svg className="w-8 h-8" style={{ color: "#dc2626" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <p className="text-lg font-semibold mb-2" style={{ color: "#1a1d2e" }}>
-              Kelas Tidak Dipilih
-            </p>
-            <p className="text-sm mb-6" style={{ color: "#64748b" }}>
-              Silakan pilih mata kuliah dari halaman Mata Kuliah Ampu terlebih dahulu.
-            </p>
-            <a
-              href="/dosen/matakuliah"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white"
-              style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)" }}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Kembali ke Mata Kuliah Ampu
-            </a>
-          </CardContent>
-        </Card>
+        
+        <SelectMataKuliahCard />
       </div>
     );
   }

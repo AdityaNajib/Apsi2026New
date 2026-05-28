@@ -40,7 +40,6 @@ export default function Sidebar({ role, name }: SidebarProps) {
       case "DOSEN":
         return [
           { name: "Dashboard", href: "/dosen", icon: LayoutDashboard },
-          { name: "Mata Kuliah Ampu", href: "/dosen/matakuliah", icon: BookOpen },
           { name: "Input Nilai", href: "/dosen/nilai", icon: PenTool },
           { name: "Rekap Mahasiswa", href: "/dosen/rekap", icon: ClipboardList },
         ];
