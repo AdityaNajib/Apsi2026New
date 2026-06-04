@@ -12,36 +12,35 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    setTimeout(() => {
-      let role = "";
-      let name = "";
-      let userId = "";
-      let redirectPath = "";
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (email === "kaprodi@staff.uns.ac.id") {
-        role = "KAPRODI"; name = "Dr. Wahyudi, S.T., M.T."; userId = "kaprodi-001"; redirectPath = "/kaprodi";
-      } else if (email === "admin@staff.uns.ac.id") {
-        role = "ADMIN"; name = "Budi Santoso, S.Kom."; userId = "admin-001"; redirectPath = "/admin";
-      } else if (email.endsWith("@staff.uns.ac.id")) {
-        role = "DOSEN"; name = "Ir. Joko Widodo, M.T."; userId = "dosen-001"; redirectPath = "/dosen";
-      } else if (email.endsWith("@student.uns.ac.id")) {
-        role = "MAHASISWA"; name = "Aditya Pratama"; userId = "mhs-001"; redirectPath = "/mahasiswa";
-      } else {
-        setError("Email institusi tidak valid atau tidak terdaftar.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login gagal');
         setIsLoading(false);
         return;
       }
 
-      document.cookie = `role=${role}; path=/`;
-      document.cookie = `name=${name}; path=/`;
-      document.cookie = `userId=${userId}; path=/`;
-      router.push(redirectPath);
-    }, 1000);
+      // Redirect to appropriate dashboard
+      router.push(data.redirectPath);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Terjadi kesalahan saat login');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -186,7 +185,10 @@ export default function LoginPage() {
                   <button
                     key={acc.role}
                     type="button"
-                    onClick={() => setEmail(acc.email)}
+                    onClick={() => {
+                      setEmail(acc.email);
+                      setPassword('password123');
+                    }}
                     className="text-left p-2.5 rounded-xl transition-all"
                     style={{ background: acc.bg, border: `1px solid ${acc.bg}` }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.border = `1px solid ${acc.color}`; }}
@@ -197,7 +199,7 @@ export default function LoginPage() {
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-center mt-3" style={{ color: "#cbd5e1" }}>Klik kartu untuk isi email otomatis</p>
+              <p className="text-xs text-center mt-3" style={{ color: "#cbd5e1" }}>Klik kartu untuk isi email & password otomatis (password: password123)</p>
             </div>
           </div>
         </div>

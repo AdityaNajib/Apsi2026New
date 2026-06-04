@@ -140,7 +140,7 @@ export default function DosenDashboard() {
                         </td>
                         <td className="py-4">
                           <a
-                            href={`/dosen/nilai?kelasId=${mk.kelasId}`}
+                            href={`/dosen/rekap?kelasId=${mk.kelasId}`}
                             className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors inline-block"
                             style={{ background: "#eef2ff", color: "#4361ee" }}
                             onMouseEnter={(e) => {
@@ -152,7 +152,7 @@ export default function DosenDashboard() {
                               (e.currentTarget as HTMLElement).style.color = "#4361ee";
                             }}
                           >
-                            Input Nilai
+                            Lihat Detail
                           </a>
                         </td>
                       </tr>

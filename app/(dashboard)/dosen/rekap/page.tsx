@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { BookOpen, Users, Award, Download, FileBarChart } from "lucide-react";
+import { BookOpen, Users, Award, Download, FileBarChart, ArrowLeft } from "lucide-react";
 
 interface MataKuliah {
   kelasId: string;
   kode: string;
   nama: string;
-  namaKelas: string;
+  kelas: string;
   jumlahMahasiswa: number;
+  statusNilai: string;
 }
 
 interface RekapMahasiswa {
@@ -37,59 +39,112 @@ interface KomponenNilai {
   bobot: number;
 }
 
-export default function RekapMahasiswaPage() {
+function SelectMataKuliahCard() {
+  const router = useRouter();
   const [mataKuliah, setMataKuliah] = useState<MataKuliah[]>([]);
-  const [selectedKelas, setSelectedKelas] = useState<string>("");
-  const [kelasInfo, setKelasInfo] = useState<KelasInfo | null>(null);
-  const [komponenNilai, setKomponenNilai] = useState<KomponenNilai[]>([]);
-  const [rekap, setRekap] = useState<RekapMahasiswa[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingRekap, setLoadingRekap] = useState(false);
 
   useEffect(() => {
     fetchMataKuliah();
   }, []);
-
-  useEffect(() => {
-    if (selectedKelas) {
-      fetchRekap(selectedKelas);
-    }
-  }, [selectedKelas]);
 
   const fetchMataKuliah = async () => {
     try {
       const res = await fetch("/api/dosen/mata-kuliah");
       const data = await res.json();
       setMataKuliah(Array.isArray(data) ? data : []);
-      if (Array.isArray(data) && data.length > 0) {
-        setSelectedKelas(data[0].kelasId);
-      }
     } catch (error) {
-      console.error("Error fetching mata kuliah:", error);
-      setMataKuliah([]);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {mataKuliah.map((mk) => (
+        <div 
+          key={mk.kelasId} 
+          className="cursor-pointer hover:shadow-lg transition-all"
+          onClick={() => router.push(`/dosen/rekap?kelasId=${mk.kelasId}`)}
+        >
+          <Card>
+            <CardContent className="p-0">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "#ede9fe" }}>
+                  <BookOpen className="w-6 h-6" style={{ color: "#7c3aed" }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg" style={{ color: "#1a1d2e" }}>{mk.nama}</h3>
+                  <p className="text-sm" style={{ color: "#94a3b8" }}>{mk.kode} - Kelas {mk.kelas}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                      {mk.jumlahMahasiswa} Mahasiswa
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ 
+                      background: mk.statusNilai === "Siap Input Nilai" ? "#d1fae5" : "#fef3c7",
+                      color: mk.statusNilai === "Siap Input Nilai" ? "#059669" : "#d97706"
+                    }}>
+                      {mk.statusNilai}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RekapMahasiswaPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const kelasId = searchParams.get("kelasId");
+
+  const [kelasInfo, setKelasInfo] = useState<KelasInfo | null>(null);
+  const [komponenNilai, setKomponenNilai] = useState<KomponenNilai[]>([]);
+  const [rekap, setRekap] = useState<RekapMahasiswa[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (kelasId) {
+      fetchRekap(kelasId);
+    } else {
+      setLoading(false);
+    }
+  }, [kelasId]);
+
   const fetchRekap = async (kelasId: string) => {
     try {
-      setLoadingRekap(true);
+      setLoading(true);
       const res = await fetch(`/api/dosen/rekap/${kelasId}`);
       const data = await res.json();
-      setKelasInfo(data.kelas);
-      setKomponenNilai(data.komponenNilai);
-      setRekap(data.rekap);
+      setKelasInfo(data.kelas || null);
+      setKomponenNilai(Array.isArray(data.komponenNilai) ? data.komponenNilai : []);
+      setRekap(Array.isArray(data.rekap) ? data.rekap : []);
     } catch (error) {
       console.error("Error fetching rekap:", error);
+      setKelasInfo(null);
+      setKomponenNilai([]);
+      setRekap([]);
     } finally {
-      setLoadingRekap(false);
+      setLoading(false);
     }
   };
 
   const exportToExcel = () => {
     // Simple CSV export
-    if (!kelasInfo || rekap.length === 0) return;
+    if (!kelasInfo || !Array.isArray(rekap) || rekap.length === 0) return;
 
     let csv = "NIM,Nama,Angkatan,";
     komponenNilai.forEach((k) => {
@@ -115,7 +170,9 @@ export default function RekapMahasiswaPage() {
   };
 
   const getStatistik = () => {
-    if (rekap.length === 0) return { rataRata: 0, tertinggi: 0, terendah: 0, lulus: 0 };
+    if (!Array.isArray(rekap) || rekap.length === 0) {
+      return { rataRata: 0, tertinggi: 0, terendah: 0, lulus: 0 };
+    }
 
     const nilaiList = rekap.map((r) => r.nilaiAkhir);
     const rataRata = nilaiList.reduce((sum, n) => sum + n, 0) / nilaiList.length;
@@ -141,6 +198,23 @@ export default function RekapMahasiswaPage() {
     return { bg: "#fee2e2", color: "#dc2626" };
   };
 
+  if (!kelasId) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>
+            Rekap Nilai Mahasiswa
+          </h2>
+          <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
+            Pilih mata kuliah untuk melihat rekap nilai
+          </p>
+        </div>
+        
+        <SelectMataKuliahCard />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -153,15 +227,30 @@ export default function RekapMahasiswaPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>
-            Rekap Nilai Mahasiswa
-          </h2>
-          <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Lihat rekap dan statistik nilai mahasiswa per mata kuliah
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push("/dosen/rekap")}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+            style={{ background: "#f1f5f9", color: "#64748b" }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "#e2e8f0";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "#f1f5f9";
+            }}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>
+              Rekap Nilai Mahasiswa
+            </h2>
+            <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
+              Lihat rekap dan statistik nilai mahasiswa per mata kuliah
+            </p>
+          </div>
         </div>
-        {rekap.length > 0 && (
+        {rekap && Array.isArray(rekap) && rekap.length > 0 && (
           <button
             onClick={exportToExcel}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white"
@@ -173,32 +262,13 @@ export default function RekapMahasiswaPage() {
         )}
       </div>
 
-      {/* Mata Kuliah Selector */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pilih Mata Kuliah</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <select
-            value={selectedKelas}
-            onChange={(e) => setSelectedKelas(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
-            style={{ background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#1a1d2e" }}
-          >
-            {mataKuliah.map((mk) => (
-              <option key={mk.kelasId} value={mk.kelasId}>
-                {mk.kode} - {mk.nama} ({mk.namaKelas}) - {mk.jumlahMahasiswa} mahasiswa
-              </option>
-            ))}
-          </select>
-        </CardContent>
-      </Card>
+      {/* Mata Kuliah Selector - REMOVED */}
 
-      {loadingRekap ? (
+      {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : rekap.length === 0 ? (
+      ) : !Array.isArray(rekap) || rekap.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <FileBarChart className="w-12 h-12 mx-auto mb-4" style={{ color: "#cbd5e1" }} />
@@ -352,5 +422,17 @@ export default function RekapMahasiswaPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function RekapMahasiswaPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-96">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <RekapMahasiswaPageContent />
+    </Suspense>
   );
 }

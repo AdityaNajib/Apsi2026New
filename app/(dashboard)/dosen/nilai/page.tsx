@@ -66,34 +66,36 @@ function SelectMataKuliahCard() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
       {mataKuliah.map((mk) => (
-        <Card 
+        <div 
           key={mk.kelasId} 
-          className="cursor-pointer hover:shadow-lg transition-all" 
+          className="cursor-pointer hover:shadow-lg transition-all"
           onClick={() => router.push(`/dosen/nilai?kelasId=${mk.kelasId}`)}
         >
-          <CardContent className="p-0">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "#ede9fe" }}>
-                <BookOpen className="w-6 h-6" style={{ color: "#7c3aed" }} />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg" style={{ color: "#1a1d2e" }}>{mk.nama}</h3>
-                <p className="text-sm" style={{ color: "#94a3b8" }}>{mk.kode} - Kelas {mk.kelas}</p>
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-xs px-2 py-1 rounded-lg" style={{ background: "#dbeafe", color: "#2563eb" }}>
-                    {mk.jumlahMahasiswa} Mahasiswa
-                  </span>
-                  <span className="text-xs px-2 py-1 rounded-lg" style={{ 
-                    background: mk.statusNilai === "Siap Input Nilai" ? "#d1fae5" : "#fef3c7",
-                    color: mk.statusNilai === "Siap Input Nilai" ? "#059669" : "#d97706"
-                  }}>
-                    {mk.statusNilai}
-                  </span>
+          <Card>
+            <CardContent className="p-0">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "#ede9fe" }}>
+                  <BookOpen className="w-6 h-6" style={{ color: "#7c3aed" }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg" style={{ color: "#1a1d2e" }}>{mk.nama}</h3>
+                  <p className="text-sm" style={{ color: "#94a3b8" }}>{mk.kode} - Kelas {mk.kelas}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                      {mk.jumlahMahasiswa} Mahasiswa
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-lg" style={{ 
+                      background: mk.statusNilai === "Siap Input Nilai" ? "#d1fae5" : "#fef3c7",
+                      color: mk.statusNilai === "Siap Input Nilai" ? "#059669" : "#d97706"
+                    }}>
+                      {mk.statusNilai}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       ))}
     </div>
   );

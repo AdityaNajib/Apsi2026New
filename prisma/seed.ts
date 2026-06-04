@@ -27,8 +27,8 @@ async function main() {
   const kaprodiUser = await prisma.user.create({
     data: {
       id: 'kaprodi-001',
-      name: 'Dr. Wahyudi, S.T., M.T.',
-      email: 'kaprodi@staff.uns.ac.id',
+      name: 'Dr. Wakhid Ahmad Jauhari, S.T., M.T.',
+      email: 'wakhidjauhari@staff.uns.ac.id',
       password: hashedPassword,
       role: 'KAPRODI',
     },
@@ -595,7 +595,8 @@ async function main() {
   console.log('- PI: 8 (Performance Indicators)');
   console.log('- CPMK: 9 (tersebar di 4 mata kuliah)');
   console.log('\n🔑 Login credentials:');
-  console.log('- Kaprodi: kaprodi@staff.uns.ac.id / password123');
+  console.log('- Kaprodi: wakhidjauhari@staff.uns.ac.id / password123');
+  console.log('  → Dr. Wakhid Ahmad Jauhari, S.T., M.T.');
   console.log('- Admin: admin@staff.uns.ac.id / password123');
   console.log('- Dosen: dosen@staff.uns.ac.id / password123');
   console.log('  → Mengampu 4 mata kuliah:');
