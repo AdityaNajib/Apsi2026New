@@ -1,252 +1,364 @@
-# 🎓 Sistem Capaian Pembelajaran (SICAL) - Teknik Industri UNS
+# 🎓 SICAL-TI UNS - Sistem Capaian Pembelajaran Lulusan
 
-> Sistem informasi untuk mengelola dan memantau Capaian Pembelajaran Lulusan (CPL) Program Studi Teknik Industri Universitas Sebelas Maret.
+**Sistem Informasi Capaian Pembelajaran Lulusan**  
+**Program Studi Teknik Industri - Universitas Sebelas Maret**
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748)](https://www.prisma.io/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC)](https://tailwindcss.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5-2D3748)](https://www.prisma.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+---
+
+## 📋 Deskripsi
+
+SICAL-TI UNS adalah sistem manajemen capaian pembelajaran lulusan (CPL) yang dirancang khusus untuk Program Studi Teknik Industri UNS. Sistem ini membantu dalam:
+
+- 📊 Monitoring dan evaluasi capaian pembelajaran mahasiswa
+- 📝 Manajemen kurikulum (CPL, PI/IK, CPMK)
+- 🎯 Input dan rekap nilai mahasiswa
+- 📈 Visualisasi capaian CPL dengan grafik
+- 📄 Export laporan dalam format CSV/Excel
 
 ---
 
 ## ✨ Fitur Utama
 
-### 👨‍🎓 Mahasiswa
-- ✅ **Profil Lengkap** - Data pribadi & akademik
-- ✅ **Hasil CPL** - Visualisasi Radar Chart & detail capaian
-- ✅ **Riwayat Nilai** - Per semester dengan IPK/IPS
+### 🔐 Multi-Role Dashboard
 
-### 👨‍🏫 Dosen
-- ✅ **Kelola Mata Kuliah** - List kelas yang diampu
-- ✅ **Input Nilai** - Komponen nilai (UTS, UAS, Tugas, dll)
-- ✅ **Rekap Mahasiswa** - Statistik & export CSV
+#### 1. **Dashboard Kaprodi**
+- Manajemen Admin Prodi (CRUD)
+- Kelola Kurikulum (CPL, PI/IK, CPMK)
+- Laporan Capaian CPL
+- Visualisasi & Analitik
 
-### 👔 Kaprodi
-- ✅ **Data Kurikulum** - Kelola CPL, PI, CPMK
-- ✅ **Laporan CPL** - Statistik capaian per angkatan
-- ✅ **Manajemen Admin** - CRUD admin prodi (NIDN, NIP, Email)
+#### 2. **Dashboard Admin**
+- Kelola Data Kurikulum
+- Lihat Laporan CPL
+- Export Data
 
-### 🔧 Admin
-- ✅ **Data Kurikulum** - Kelola CPL, PI, CPMK
-- ✅ **Laporan CPL** - Statistik capaian
+#### 3. **Dashboard Dosen**
+- Daftar Mata Kuliah yang Diampu
+- Input Nilai Mahasiswa per Komponen
+- Rekap Nilai dengan Statistik
+- Export CSV
+
+#### 4. **Dashboard Mahasiswa**
+- Profil Akademik Lengkap
+- Hasil Capaian CPL (Radar Chart)
+- Riwayat Nilai per Semester
+- Progress Pembelajaran
 
 ---
 
-## 🚀 Quick Start (5 Menit)
+## 🏗️ Teknologi
 
-### 1️⃣ Install Dependencies
+### Frontend
+- **Next.js 15** - React Framework
+- **TypeScript** - Type Safety
+- **Tailwind CSS** - Styling
+- **Recharts** - Data Visualization
+- **Lucide React** - Icons
+
+### Backend
+- **Next.js API Routes** - Backend API
+- **Prisma ORM** - Database Management
+- **SQLite** - Database (Development)
+- **bcryptjs** - Password Hashing
+
+### Tools
+- **ESLint** - Code Linting
+- **Prettier** - Code Formatting
+- **Git** - Version Control
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ dan npm
+- Git
+
+### Installation
+
 ```bash
+# Clone repository
+git clone https://github.com/AdityaNajib/Apsi2026New.git
+cd Apsi2026New
+
+# Install dependencies
 npm install
-```
 
-### 2️⃣ Setup Database
-```bash
+# Setup database
 npx prisma generate
 npx prisma migrate dev
-npm run db:seed
-```
 
-### 3️⃣ Jalankan Aplikasi
-```bash
+# Seed database dengan data sample
+npm run db:seed
+
+# Jalankan development server
 npm run dev
 ```
 
-Buka browser: **http://localhost:3000**
+Aplikasi akan berjalan di: **http://localhost:3000**
 
 ---
 
-## 🔑 Akun Default (Development)
+## 🔑 Akun Default
 
-| Role | Email | Password |
-|------|-------|----------|
-| **Kaprodi** | `kaprodi@staff.uns.ac.id` | `password123` |
-| **Admin** | `admin@staff.uns.ac.id` | `password123` |
-| **Dosen** | `dosen@staff.uns.ac.id` | `password123` |
-| **Mahasiswa** | `aditya@student.uns.ac.id` | `password123` |
+### Kaprodi
+```
+Email: wakhidjauhari@staff.uns.ac.id
+Password: password123
+Nama: Dr. Wakhid Ahmad Jauhari, S.T., M.T.
+```
 
----
+### Dosen
+```
+Email: dosen@staff.uns.ac.id
+Password: password123
+Nama: Ir. Joko Widodo, M.T.
+```
 
-## 📊 Data Sample (dari Seed)
+### Mahasiswa
+```
+Email: aditya@student.uns.ac.id
+Password: password123
+NIM: I0323001
+Nama: Aditya Pratama
+```
 
-- **14 Akun** → 1 Kaprodi, 2 Admin, 2 Dosen, 10 Mahasiswa
-- **4 Mata Kuliah** → Sistem Basis Data, Algoritma, AI, Manajemen Proyek
-- **4 Kelas** → Tahun Ajaran 2026/2027 Ganjil
-- **12 CPL** → Sesuai standar IABEE
-- **8 Mahasiswa** → Sudah ada nilai di kelas Sistem Basis Data
-
----
-
-## 📦 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | Next.js 16 (App Router) |
-| **Language** | TypeScript 5 |
-| **Database** | SQLite (Prisma ORM) |
-| **Styling** | Tailwind CSS 4 |
-| **Charts** | Chart.js + react-chartjs-2 |
-| **Auth** | bcryptjs + cookies |
-| **Export** | XLSX (Excel/CSV) |
+### Admin
+```
+Email: admin@staff.uns.ac.id
+Password: password123
+Nama: Budi Santoso, S.Kom.
+```
 
 ---
 
-## 📚 Dokumentasi Lengkap
+## 📊 Hierarki Kurikulum
 
-| Dokumen | Deskripsi |
-|---------|-----------|
-| **[MULAI_DISINI.md](MULAI_DISINI.md)** | 🚀 Quick start & flow lengkap |
-| **[PANDUAN_LENGKAP.md](PANDUAN_LENGKAP.md)** | 📖 Dokumentasi detail semua fitur |
-| **[STATUS_IMPLEMENTASI.md](STATUS_IMPLEMENTASI.md)** | ✅ Checklist fitur & status |
-| **[FAQ_TROUBLESHOOTING.md](FAQ_TROUBLESHOOTING.md)** | 🔧 Solusi masalah umum |
+Sistem mengimplementasi hierarki lengkap sesuai standar OBE (Outcome-Based Education):
 
----
+```
+CPL (Capaian Pembelajaran Lulusan)
+ └─ PI/IK (Performance Indicator / Indikator Kinerja)
+     └─ CPMK (Capaian Pembelajaran Mata Kuliah)
+         └─ Mata Kuliah
+             └─ Kelas
+                 └─ Komponen Nilai (UTS, UAS, Tugas)
+                     └─ Nilai Mahasiswa
+```
 
-## 🎯 Fitur yang Sudah Selesai
-
-### ✅ Mahasiswa
-- [x] Dashboard overview CPL
-- [x] Halaman Profil lengkap
-- [x] Halaman Hasil CPL (Radar + Detail)
-- [x] Halaman Riwayat Nilai per semester
-
-### ✅ Dosen  
-- [x] Dashboard mata kuliah
-- [x] Input & kelola komponen nilai
-- [x] Input nilai per mahasiswa
-- [x] Rekap mahasiswa dengan statistik
-- [x] Export data ke CSV/Excel
-
-### ✅ Kaprodi
-- [x] Dashboard overview
-- [x] CRUD CPL, PI, CPMK
-- [x] Laporan capaian CPL
-- [x] **Manajemen Admin** (Tambah/Edit/Hapus)
-
-### ✅ Admin
-- [x] CRUD CPL, PI, CPMK
-- [x] Laporan capaian CPL
+### Data yang Tersedia
+- **12 CPL** sesuai standar IABEE
+- **8 PI/IK** (Performance Indicators)
+- **9 CPMK** tersebar di 4 mata kuliah
+- **4 Mata Kuliah** dengan 4 kelas aktif
+- **10 Mahasiswa** sample data
+- **Nilai lengkap** untuk 1 kelas
 
 ---
 
-## 🔐 Role & Permission
-
-| Fitur | Kaprodi | Admin | Dosen | Mahasiswa |
-|-------|---------|-------|-------|-----------|
-| Dashboard | ✅ | ✅ | ✅ | ✅ |
-| Profil | - | - | - | ✅ |
-| Hasil CPL | - | - | - | ✅ |
-| Riwayat Nilai | - | - | - | ✅ |
-| Input Nilai | - | - | ✅ | - |
-| Rekap Mahasiswa | - | - | ✅ | - |
-| Data Kurikulum | ✅ | ✅ | - | - |
-| Laporan CPL | ✅ | ✅ | - | - |
-| **Manajemen Admin** | ✅ | - | - | - |
-
----
-
-## 🗂️ Struktur Proyek
+## 📁 Struktur Proyek
 
 ```
 apsi2026/
 ├── app/
-│   ├── (auth)/          # Login
-│   ├── (dashboard)/     # Dashboard (Kaprodi, Admin, Dosen, Mahasiswa)
-│   ├── api/             # API Routes
-│   └── page.tsx         # Landing page
+│   ├── (auth)/
+│   │   └── login/              # Halaman login
+│   ├── (dashboard)/
+│   │   ├── kaprodi/            # Dashboard Kaprodi
+│   │   ├── admin/              # Dashboard Admin
+│   │   ├── dosen/              # Dashboard Dosen
+│   │   └── mahasiswa/          # Dashboard Mahasiswa
+│   ├── api/
+│   │   ├── auth/               # API Authentication
+│   │   ├── dosen/              # API Dosen
+│   │   └── kaprodi/            # API Kaprodi
+│   └── layout.tsx              # Root layout
 ├── components/
-│   ├── ui/              # Reusable UI components
-│   └── charts/          # Chart components
+│   ├── charts/                 # Chart components
+│   ├── layout/                 # Layout components (Sidebar, Navbar)
+│   └── ui/                     # UI components (Card, Table)
 ├── lib/
-│   └── prisma.ts        # Prisma client
+│   ├── auth.ts                 # Auth utilities
+│   └── prisma.ts               # Prisma client
 ├── prisma/
-│   ├── schema.prisma    # Database schema
-│   └── seed.ts          # Seed data
-├── public/              # Static assets
-└── README.md            # You are here
+│   ├── schema.prisma           # Database schema
+│   ├── seed.ts                 # Seed script
+│   └── dev.db                  # SQLite database
+└── public/                     # Static assets
 ```
 
 ---
 
-## 🛠️ Development Commands
+## 🗄️ Database Schema
 
+### Models Utama
+
+- **User** - Akun pengguna (Kaprodi, Admin, Dosen, Mahasiswa)
+- **Mahasiswa** - Data mahasiswa
+- **Dosen** - Data dosen
+- **MataKuliah** - Data mata kuliah
+- **Kelas** - Kelas per semester
+- **CPL** - Capaian Pembelajaran Lulusan
+- **PI** - Performance Indicator (Indikator Kinerja)
+- **CPMK** - Capaian Pembelajaran Mata Kuliah
+- **KomponenNilai** - Komponen penilaian (UTS, UAS, Tugas)
+- **NilaiMahasiswa** - Nilai mahasiswa per komponen
+- **BobotCPMK** - Bobot CPMK per komponen nilai
+
+---
+
+## 🎨 Screenshots
+
+### Dashboard Mahasiswa
+![Dashboard Mahasiswa](docs/screenshots/mahasiswa-dashboard.png)
+- Visualisasi CPL dengan Radar Chart
+- Tabel rincian nilai CPL
+- Profil akademik lengkap
+
+### Dashboard Dosen
+![Dashboard Dosen](docs/screenshots/dosen-dashboard.png)
+- List mata kuliah yang diampu
+- Input nilai per komponen
+- Rekap nilai dengan statistik
+
+### Dashboard Kaprodi
+![Dashboard Kaprodi](docs/screenshots/kaprodi-dashboard.png)
+- Manajemen admin prodi
+- Kelola kurikulum (CPL, PI, CPMK)
+- Laporan capaian pembelajaran
+
+---
+
+## 📚 Dokumentasi
+
+Dokumentasi lengkap tersedia di folder root:
+
+- **[MULAI_DISINI.md](./MULAI_DISINI.md)** - Panduan quick start
+- **[PANDUAN_LENGKAP.md](./PANDUAN_LENGKAP.md)** - Dokumentasi lengkap
+- **[KREDENSIAL_AKUN.md](./KREDENSIAL_AKUN.md)** - Daftar akun & password
+- **[SYSTEM_STATUS.md](./SYSTEM_STATUS.md)** - Status implementasi
+- **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** - API reference
+
+---
+
+## 🧪 Testing
+
+### Run Tests
 ```bash
-# Development server
-npm run dev
+# Unit tests
+npm test
 
-# Build production
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:coverage
+```
+
+### Manual Testing
+1. Login dengan akun default
+2. Test setiap fitur per role
+3. Verifikasi CRUD operations
+4. Check responsive design
+5. Test export functionality
+
+---
+
+## 🚢 Deployment
+
+### Build Production
+```bash
 npm run build
-
-# Start production server
 npm start
-
-# Lint code
-npm run lint
-
-# Database commands
-npx prisma generate      # Generate Prisma Client
-npx prisma migrate dev   # Run migrations
-npm run db:seed          # Seed database
-npx prisma studio        # Open Prisma Studio (GUI)
 ```
 
----
+### Environment Variables
+Buat file `.env` di root:
+```env
+DATABASE_URL="file:./dev.db"
+NODE_ENV="production"
+```
 
-## 🔄 Reset Database
-
+### Deploy to Vercel
 ```bash
-# Hapus database
-rm prisma/dev.db
-
-# Re-migrate & seed
-npx prisma migrate dev
-npm run db:seed
+vercel --prod
 ```
 
 ---
 
-## ❓ FAQ Cepat
+## 🤝 Contributing
 
-**Q: Menu mahasiswa tidak muncul?**  
-A: Menu sudah ada di `/mahasiswa/profil`, `/mahasiswa/cpl`, `/mahasiswa/riwayat`
+Kontribusi sangat diterima! Silakan:
 
-**Q: Rekap mahasiswa kosong?**  
-A: Pilih kelas **Sistem Basis Data** (TI2023) yang sudah ada nilai
-
-**Q: Cara tambah admin?**  
-A: Login sebagai Kaprodi → Manajemen Admin → Tambah Admin
-
-**Q: Password default?**  
-A: Semua akun: `password123`
+1. Fork repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
 
 ---
 
-## 📞 Support & Dokumentasi
+## 📝 Changelog
 
-Untuk bantuan lebih lanjut, baca dokumentasi di:
-- **[MULAI_DISINI.md](MULAI_DISINI.md)** - Panduan cepat
-- **[FAQ_TROUBLESHOOTING.md](FAQ_TROUBLESHOOTING.md)** - Troubleshooting
+### Version 1.0.0 (Juni 2026)
+- ✅ Dashboard 4 role (Kaprodi, Admin, Dosen, Mahasiswa)
+- ✅ Manajemen kurikulum lengkap (CPL, PI/IK, CPMK)
+- ✅ Input & rekap nilai mahasiswa
+- ✅ Visualisasi CPL dengan Radar Chart
+- ✅ Export data CSV/Excel
+- ✅ Autentikasi & otorisasi lengkap
+- ✅ Responsive design
+- ✅ Real-time calculation nilai akhir
 
 ---
 
-## ✅ Status Proyek
+## 👥 Tim Pengembang
 
-**Semua fitur inti sudah selesai dan berfungsi dengan baik:**
-- ✅ Autentikasi & otorisasi
-- ✅ CRUD lengkap untuk semua role
-- ✅ Menu mahasiswa lengkap (Profil, CPL, Riwayat)
-- ✅ Manajemen admin oleh Kaprodi (bukan dummy)
-- ✅ Detail & rekap mahasiswa di dashboard dosen
-- ✅ Visualisasi & statistik
-- ✅ Export data
+**Program Studi Teknik Industri UNS**
 
-**Tidak ada bug atau masalah.** Sistem siap digunakan! 🎉
+- **Kaprodi:** Dr. Wakhid Ahmad Jauhari, S.T., M.T.
+- **Developer:** Aditya Najib
+- **Academic Advisor:** TI UNS Faculty
+
+---
+
+## 📞 Kontak & Support
+
+- **Email:** wakhidjauhari@staff.uns.ac.id
+- **Website:** [ti.uns.ac.id](https://ti.uns.ac.id)
+- **GitHub Issues:** [Report Bug](https://github.com/AdityaNajib/Apsi2026New/issues)
 
 ---
 
 ## 📄 License
 
-Sistem ini dikembangkan untuk Program Studi Teknik Industri UNS.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Dibuat dengan ❤️ untuk Teknik Industri UNS**
+## 🙏 Acknowledgments
+
+- Next.js Team untuk framework yang amazing
+- Prisma Team untuk ORM yang powerful
+- Tailwind CSS untuk utility-first CSS
+- UNS Teknik Industri untuk support & requirements
+- Semua kontributor yang telah membantu project ini
+
+---
+
+## 🌟 Star History
+
+Jika project ini bermanfaat, jangan lupa kasih ⭐️!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=AdityaNajib/Apsi2026New&type=Date)](https://star-history.com/#AdityaNajib/Apsi2026New&Date)
+
+---
+
+**Made with ❤️ for Teknik Industri UNS**
+
