@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { BookOpen, Users, Award, Download, FileBarChart, ArrowLeft } from "lucide-react";
+import { useScrollRestore } from "@/lib/useScrollRestore";
 
 interface MataKuliah {
   kelasId: string;
@@ -43,12 +44,14 @@ function SelectMataKuliahCard() {
   const router = useRouter();
   const [mataKuliah, setMataKuliah] = useState<MataKuliah[]>([]);
   const [loading, setLoading] = useState(true);
+  const { saveScroll, restoreScroll } = useScrollRestore();
 
   useEffect(() => {
     fetchMataKuliah();
   }, []);
 
   const fetchMataKuliah = async () => {
+    saveScroll();
     try {
       const res = await fetch("/api/dosen/mata-kuliah");
       const data = await res.json();
@@ -57,6 +60,7 @@ function SelectMataKuliahCard() {
       console.error("Error:", error);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
   };
 
@@ -116,6 +120,8 @@ function RekapMahasiswaPageContent() {
   const [rekap, setRekap] = useState<RekapMahasiswa[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { saveScroll, restoreScroll } = useScrollRestore();
+
   useEffect(() => {
     if (kelasId) {
       fetchRekap(kelasId);
@@ -125,6 +131,7 @@ function RekapMahasiswaPageContent() {
   }, [kelasId]);
 
   const fetchRekap = async (kelasId: string) => {
+    saveScroll();
     try {
       setLoading(true);
       const res = await fetch(`/api/dosen/rekap/${kelasId}`);
@@ -139,34 +146,53 @@ function RekapMahasiswaPageContent() {
       setRekap([]);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
   };
 
   const exportToExcel = () => {
-    // Simple CSV export
     if (!kelasInfo || !Array.isArray(rekap) || rekap.length === 0) return;
 
-    let csv = "NIM,Nama,Angkatan,";
-    komponenNilai.forEach((k) => {
-      csv += `${k.nama} (${k.bobot}%),`;
-    });
-    csv += "Nilai Akhir,Nilai Huruf\n";
+    const tahun = new Date().getFullYear();
+    // BOM UTF-8 agar Excel baca karakter dengan benar
+    let csv = '\uFEFF';
+    csv += `REKAP NILAI MAHASISWA\r\n`;
+    csv += `Mata Kuliah: ${kelasInfo.mataKuliah} (${kelasInfo.kode})\r\n`;
+    csv += `Kelas: ${kelasInfo.nama} | ${kelasInfo.tahunAjaran} | ${kelasInfo.semester}\r\n`;
+    csv += `Dicetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}\r\n`;
+    csv += `\r\n`;
 
+    // Header kolom
+    const headers = ['NIM', 'Nama Mahasiswa', 'Angkatan'];
+    komponenNilai.forEach((k) => headers.push(`${k.nama} (${k.bobot}%)`));
+    headers.push('Nilai Akhir', 'Nilai Huruf', 'Status');
+    csv += headers.map((h) => `"${h}"`).join(',') + '\r\n';
+
+    // Data baris
     rekap.forEach((r) => {
-      csv += `${r.nim},${r.nama},${r.angkatan},`;
+      const row = [r.nim, r.nama, r.angkatan];
       komponenNilai.forEach((k) => {
         const nilai = r.nilaiKomponen.find((n) => n.komponenId === k.id);
-        csv += `${nilai?.nilai ?? "-"},`;
+        row.push(String(nilai?.nilai ?? '-'));
       });
-      csv += `${r.nilaiAkhir},${r.nilaiHuruf}\n`;
+      row.push(String(r.nilaiAkhir), r.nilaiHuruf, r.nilaiAkhir >= 55 ? 'Lulus' : 'Tidak Lulus');
+      csv += row.map((v) => `"${v}"`).join(',') + '\r\n';
     });
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    // Summary
+    csv += `\r\n`;
+    csv += `"Rata-rata Kelas","${stats.rataRata}"\r\n`;
+    csv += `"Nilai Tertinggi","${stats.tertinggi}"\r\n`;
+    csv += `"Nilai Terendah","${stats.terendah}"\r\n`;
+    csv += `"Jumlah Lulus","${stats.lulus} dari ${rekap.length}"\r\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = url;
-    a.download = `Rekap_${kelasInfo.kode}_${kelasInfo.nama}.csv`;
+    a.download = `Rekap_${kelasInfo.kode}_Kelas${kelasInfo.nama}_${tahun}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   const getStatistik = () => {

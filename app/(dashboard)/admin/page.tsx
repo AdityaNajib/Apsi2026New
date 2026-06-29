@@ -1,181 +1,213 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import RadarChartCPL from "@/components/charts/RadarChart";
-import { Users, BookOpen, Target, FileCheck2, TrendingUp } from "lucide-react";
+import {
+  Users, BookOpen, Target, GraduationCap,
+  TrendingUp, School, PenTool, UserCheck, FileCheck2,
+} from "lucide-react";
+import Link from "next/link";
+import SimpleBarChart from "@/components/charts/SimpleBarChart";
+import SimplePieChart from "@/components/charts/SimplePieChart";
+import { useScrollRestore } from "@/lib/useScrollRestore";
+
+interface Stats {
+  totalDosen: number;
+  totalMahasiswa: number;
+  totalKelas: number;
+  totalMataKuliah: number;
+  totalCpl: number;
+  mahasiswaPerAngkatan: Record<string, number>;
+  mahasiswaPerStatus: Record<string, number>;
+}
 
 export default function AdminDashboard() {
-  const stats = [
-    {
-      title: "Total CPL Evaluated",
-      value: "12",
-      sub: "75% Complete",
-      icon: Target,
-      iconBg: "#ede9fe",
-      iconColor: "#7c3aed",
-      trend: "+2 bulan ini",
-      trendUp: true,
-    },
-    {
-      title: "Total PI Mapped",
-      value: "48",
-      sub: "Semua aktif",
-      icon: BookOpen,
-      iconBg: "#dbeafe",
-      iconColor: "#2563eb",
-      trend: "+5 baru",
-      trendUp: true,
-    },
-    {
-      title: "Total CPMK Defined",
-      value: "156",
-      sub: "4 Perlu Review",
-      icon: FileCheck2,
-      iconBg: "#d1fae5",
-      iconColor: "#059669",
-      trend: "4 perlu review",
-      trendUp: false,
-    },
-    {
-      title: "Total Mahasiswa",
-      value: "1,248",
-      sub: "Angkatan 2020–2024",
-      icon: Users,
-      iconBg: "#fef3c7",
-      iconColor: "#d97706",
-      trend: "+64 baru",
-      trendUp: true,
-    },
-  ];
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { saveScroll, restoreScroll } = useScrollRestore();
 
-  const kurikulumData = [
-    { kode: "TI-001", nama: "Data Structures", cpl: "CPL 01, 02, 03, 04", pi: 4, status: "Active" },
-    { kode: "TI-002", nama: "Artificial Intelligence", cpl: "CPL 01, 05, 06", pi: 6, status: "In Progress" },
-    { kode: "TI-003", nama: "Database Systems", cpl: "CPL 01, 02", pi: 3, status: "Needs Review" },
-    { kode: "TI-004", nama: "Software Engineering", cpl: "CPL 03, 04, 05", pi: 5, status: "Active" },
-  ];
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
-  const statusStyle = (status: string) => {
-    if (status === "Active") return { bg: "#d1fae5", color: "#059669" };
-    if (status === "In Progress") return { bg: "#fef3c7", color: "#d97706" };
-    return { bg: "#fee2e2", color: "#dc2626" };
+  const fetchStats = async () => {
+    saveScroll();
+    try {
+      const [dosenRes, mhsRes, kelasRes, mkRes, cplRes] = await Promise.all([
+        fetch("/api/admin/pengguna/dosen"),
+        fetch("/api/admin/pengguna/mahasiswa"),
+        fetch("/api/admin/kelas"),
+        fetch("/api/admin/mata-kuliah"),
+        fetch("/api/admin/kurikulum?type=cpl"),
+      ]);
+
+      const [dosen, mhs, kelas, mk, cpl] = await Promise.all([
+        dosenRes.json(),
+        mhsRes.json(),
+        kelasRes.json(),
+        mkRes.json(),
+        cplRes.json(),
+      ]);
+
+      const mhsArr = Array.isArray(mhs) ? mhs : [];
+      const angkatanMap: Record<string, number> = {};
+      const statusMap: Record<string, number> = { AKTIF: 0, CUTI: 0, LULUS: 0, NON_AKTIF: 0 };
+      mhsArr.forEach((m: any) => {
+        angkatanMap[m.angkatan] = (angkatanMap[m.angkatan] ?? 0) + 1;
+        const s = m.status ?? 'AKTIF';
+        statusMap[s] = (statusMap[s] ?? 0) + 1;
+      });
+
+      setStats({
+        totalDosen: Array.isArray(dosen) ? dosen.length : 0,
+        totalMahasiswa: mhsArr.length,
+        totalKelas: Array.isArray(kelas) ? kelas.length : 0,
+        totalMataKuliah: Array.isArray(mk) ? mk.length : 0,
+        totalCpl: Array.isArray(cpl) ? cpl.length : 0,
+        mahasiswaPerAngkatan: angkatanMap,
+        mahasiswaPerStatus: statusMap,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+      restoreScroll();
+    }
   };
+
+  const quickLinks = [
+    { label: "Manajemen Pengguna", href: "/admin/manajemen-pengguna", icon: Users, bg: "#dbeafe", color: "#2563eb", desc: "Tambah/edit dosen & mahasiswa" },
+    { label: "Akademik", href: "/admin/akademik", icon: BookOpen, bg: "#d1fae5", color: "#059669", desc: "Mata kuliah, kelas, dan nilai" },
+    { label: "Data Kurikulum", href: "/admin/data-kurikulum", icon: Target, bg: "#ede9fe", color: "#7c3aed", desc: "Kelola CPL, PI, dan CPMK" },
+    { label: "Laporan CPL", href: "/admin/laporan-cpl", icon: FileCheck2, bg: "#fef3c7", color: "#d97706", desc: "Laporan pencapaian CPL" },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>Dashboard Overview</h2>
-          <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>Academic performance and CPL management overview.</p>
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>Dashboard Admin Prodi</h2>
+        <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
+          Kelola pengguna, kelas, mata kuliah, dan nilai Program Studi Teknik Industri UNS.
+        </p>
+      </div>
+
+      {/* Stats */}
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {[0,1,2,3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-0 h-20 animate-pulse rounded-2xl" style={{ background: "#f1f5f9" }}>
+                <div />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <button
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
-          style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)", boxShadow: "0 4px 14px rgba(67,97,238,0.3)" }}
-        >
-          <TrendingUp className="w-4 h-4" />
-          Academic Year 2025/2026
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        {stats.map((s, i) => (
-          <Card key={i}>
-            <CardContent className="p-0">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: s.iconBg }}>
-                  <s.icon className="w-5 h-5" style={{ color: s.iconColor }} />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {[
+            { label: "Total Dosen", value: stats?.totalDosen ?? 0, icon: UserCheck, bg: "#dbeafe", color: "#2563eb" },
+            { label: "Total Mahasiswa", value: stats?.totalMahasiswa ?? 0, icon: GraduationCap, bg: "#ede9fe", color: "#7c3aed" },
+            { label: "Total Kelas", value: stats?.totalKelas ?? 0, icon: School, bg: "#d1fae5", color: "#059669" },
+            { label: "Mata Kuliah", value: stats?.totalMataKuliah ?? 0, icon: BookOpen, bg: "#fef3c7", color: "#d97706" },
+          ].map((s, i) => (
+            <Card key={i}>
+              <CardContent className="p-0 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: s.bg }}>
+                  <s.icon className="w-5 h-5" style={{ color: s.color }} />
                 </div>
-                <span
-                  className="text-xs font-medium px-2 py-1 rounded-lg"
-                  style={{ background: s.trendUp ? "#d1fae5" : "#fee2e2", color: s.trendUp ? "#059669" : "#dc2626" }}
-                >
-                  {s.trend}
-                </span>
-              </div>
-              <p className="text-3xl font-bold mb-1" style={{ color: "#1a1d2e" }}>{s.value}</p>
-              <p className="text-sm font-semibold mb-0.5" style={{ color: "#1a1d2e" }}>{s.title}</p>
-              <p className="text-xs" style={{ color: "#94a3b8" }}>{s.sub}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <div>
+                  <p className="text-xs font-medium" style={{ color: "#94a3b8" }}>{s.label}</p>
+                  <p className="text-2xl font-bold mt-0.5" style={{ color: "#1a1d2e" }}>{s.value}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <Card className="xl:col-span-2">
-          <CardHeader>
-            <CardTitle>Curriculum Mapping</CardTitle>
-            <a href="#" className="text-sm font-semibold" style={{ color: "#4361ee" }}>See all →</a>
-          </CardHeader>
+      {/* Mahasiswa per angkatan + CPL */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Card>
+          <CardHeader><CardTitle>Mahasiswa per Angkatan</CardTitle></CardHeader>
           <CardContent>
-            <div className="w-full overflow-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
-                    {["Course Name", "CPL Ref.", "PI Count", "Status", "Action"].map((h) => (
-                      <th key={h} className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {kurikulumData.map((row, i) => {
-                    const st = statusStyle(row.status);
-                    return (
-                      <tr key={i} style={{ borderBottom: "1px solid #f8faff" }}>
-                        <td className="py-3.5 pr-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style={{ background: "#ede9fe", color: "#7c3aed" }}>
-                              {row.kode.split("-")[1]}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-sm" style={{ color: "#1a1d2e" }}>{row.nama}</p>
-                              <p className="text-xs" style={{ color: "#94a3b8" }}>{row.kode}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3.5 pr-4 text-xs" style={{ color: "#64748b" }}>{row.cpl}</td>
-                        <td className="py-3.5 pr-4">
-                          <span className="text-xs font-medium px-2 py-1 rounded-lg" style={{ background: "#dbeafe", color: "#2563eb" }}>
-                            {row.pi} Indicators
-                          </span>
-                        </td>
-                        <td className="py-3.5 pr-4">
-                          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ background: st.bg, color: st.color }}>
-                            {row.status}
-                          </span>
-                        </td>
-                        <td className="py-3.5">
-                          <button className="text-xs font-semibold" style={{ color: "#4361ee" }}>Edit</button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {loading ? (
+              <div className="space-y-3">
+                {[0,1,2,3].map(i => <div key={i} className="h-8 rounded-lg animate-pulse" style={{ background: "#f1f5f9" }} />)}
+              </div>
+            ) : stats && Object.keys(stats.mahasiswaPerAngkatan).length > 0 ? (
+              <SimpleBarChart
+                data={Object.entries(stats.mahasiswaPerAngkatan)
+                  .sort(([a], [b]) => Number(b) - Number(a))
+                  .map(([angkatan, count]) => ({
+                    label: angkatan,
+                    value: count
+                  }))}
+                height={250}
+                showValues={true}
+              />
+            ) : (
+              <p className="text-sm text-center py-6" style={{ color: "#94a3b8" }}>Belum ada mahasiswa</p>
+            )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Radar CPL Lulusan</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Distribusi Status Mahasiswa</CardTitle></CardHeader>
           <CardContent>
-            <div style={{ height: "300px", width: "100%" }}>
-              <RadarChartCPL />
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-xl p-3 text-center" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
-                <p className="text-2xl font-bold" style={{ color: "#059669" }}>8</p>
-                <p className="text-xs font-medium mt-0.5" style={{ color: "#059669" }}>CPL Tercapai</p>
+            {loading ? (
+              <div className="grid grid-cols-2 gap-3">
+                {[0,1,2,3].map(i => <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: "#f1f5f9" }} />)}
               </div>
-              <div className="rounded-xl p-3 text-center" style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
-                <p className="text-2xl font-bold" style={{ color: "#dc2626" }}>2</p>
-                <p className="text-xs font-medium mt-0.5" style={{ color: "#dc2626" }}>Belum Tercapai</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Aktif",     key: "AKTIF",     bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)", color: "#059669", icon: "✓" },
+                  { label: "Cuti",      key: "CUTI",      bg: "linear-gradient(135deg, #fef3c7, #fde68a)", color: "#d97706", icon: "⏸" },
+                  { label: "Lulus",     key: "LULUS",     bg: "linear-gradient(135deg, #dbeafe, #93c5fd)", color: "#4361ee", icon: "🎓" },
+                  { label: "Non-Aktif", key: "NON_AKTIF", bg: "linear-gradient(135deg, #fee2e2, #fecaca)", color: "#dc2626", icon: "✗" },
+                ].map((d) => (
+                  <div
+                    key={d.key}
+                    className="relative p-4 rounded-xl overflow-hidden group hover:scale-105 transition-transform"
+                    style={{ background: d.bg }}
+                  >
+                    <div className="absolute top-2 right-2 text-2xl opacity-20">{d.icon}</div>
+                    <div className="relative z-10">
+                      <p className="text-xs font-semibold mb-1" style={{ color: d.color }}>{d.label}</p>
+                      <p className="text-3xl font-bold" style={{ color: d.color }}>
+                        {stats?.mahasiswaPerStatus?.[d.key] ?? 0}
+                      </p>
+                      <div className="mt-2 w-full h-1 rounded-full opacity-30" style={{ background: d.color }} />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick links */}
+      <Card>
+        <CardHeader><CardTitle>Akses Cepat</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickLinks.map((q) => (
+              <Link
+                key={q.href}
+                href={q.href}
+                className="flex flex-col gap-2 p-4 rounded-2xl border transition-all hover:shadow-md hover:-translate-y-0.5"
+                style={{ background: q.bg, borderColor: "transparent" }}
+              >
+                <q.icon className="w-6 h-6" style={{ color: q.color }} />
+                <p className="font-bold text-sm" style={{ color: q.color }}>{q.label}</p>
+                <p className="text-xs" style={{ color: "#64748b" }}>{q.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

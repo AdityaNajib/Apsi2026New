@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { validateKode } from "@/lib/kodeValidation";
 
 // POST - Create new CPMK
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { kode, deskripsi, piId, mkId } = body;
+
+    const kodeErr = validateKode("cpmk", kode ?? "");
+    if (kodeErr) return NextResponse.json({ error: kodeErr }, { status: 400 });
 
     const cpmk = await prisma.cPMK.create({
       data: { kode, deskripsi, piId, mkId },
@@ -14,7 +18,6 @@ export async function POST(request: NextRequest) {
         mataKuliah: { select: { kode: true, nama: true } },
       },
     });
-
     return NextResponse.json(cpmk);
   } catch (error) {
     console.error("Error creating CPMK:", error);
@@ -28,6 +31,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { id, kode, deskripsi, piId, mkId } = body;
 
+    const kodeErr = validateKode("cpmk", kode ?? "");
+    if (kodeErr) return NextResponse.json({ error: kodeErr }, { status: 400 });
+
     const cpmk = await prisma.cPMK.update({
       where: { id },
       data: { kode, deskripsi, piId, mkId },
@@ -36,7 +42,6 @@ export async function PUT(request: NextRequest) {
         mataKuliah: { select: { kode: true, nama: true } },
       },
     });
-
     return NextResponse.json(cpmk);
   } catch (error) {
     console.error("Error updating CPMK:", error);

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERD SICAL-TI UNS</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .content {
+            padding: 40px;
+            background: white;
+        }
+        
+        .diagram-wrapper {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        #mermaid-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 600px;
+        }
+        
+        .info-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .info-card h4 {
+            color: #764ba2;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-card li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .info-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #38ef7d;
+            font-weight: bold;
+        }
+        
+        .footer {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            text-align: center;
+            color: #6c757d;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .zoom-level {
+            padding: 8px 16px;
+            background: white;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .controls, .info-box, .footer {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Entity Relationship Diagram</h1>
+            <p>SICAL-TI UNS - Sistem Informasi Capaian Pembelajaran Lulusan</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" onclick="downloadPNG()">📥 Download PNG</button>
+            <button class="btn-success" onclick="downloadSVG()">📥 Download SVG</button>
+            <button class="btn-info" onclick="printDiagram()">🖨️ Print</button>
+            <div class="zoom-controls">
+                <button class="btn-info" onclick="zoomIn()">🔍 Zoom In</button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="btn-info" onclick="zoomOut()">🔍 Zoom Out</button>
+                <button class="btn-info" onclick="resetZoom()">↺ Reset</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="diagram-wrapper">
+                <div id="mermaid-diagram">
+                    <div class="loading">⏳ Generating diagram...</div>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>📌 Database Information</h3>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>🗄️ Database Details</h4>
+                        <ul>
+                            <li>Type: SQLite</li>
+                            <li>ORM: Prisma</li>
+                            <li>Total Tables: 13</li>
+                            <li>Status: Production Ready</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>👥 Core Entities</h4>
+                        <ul>
+                            <li>User (Base account)</li>
+                            <li>Mahasiswa (Students)</li>
+                            <li>Dosen (Lecturers)</li>
+                            <li>MataKuliah (Courses)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>🎯 OBE Entities</h4>
+                        <ul>
+                            <li>CPL (Program Outcomes)</li>
+                            <li>PI (Performance Indicators)</li>
+                            <li>CPMK (Course Outcomes)</li>
+                            <li>BobotCPMK (CPMK Weights)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>📊 Assessment</h4>
+                        <ul>
+                            <li>Kelas (Classes)</li>
+                            <li>KomponenNilai (Components)</li>
+                            <li>NilaiMahasiswa (Grades)</li>
+                            <li>KRS (Enrollment)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Generated: <span id="timestamp"></span> | SICAL-TI UNS v1.0.0</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            er: {
+                useMaxWidth: true,
+                fontSize: 14,
+                layoutDirection: 'TB'
+            }
+        });
+
+        // ERD Diagram
+        const erdDiagram = `
+erDiagram
+    User ||--o| Mahasiswa : "has"
+    User ||--o| Dosen : "has"
+    
+    Mahasiswa ||--o{ KRS : "enrolls"
+    Mahasiswa ||--o{ NilaiMahasiswa : "has"
+    
+    Dosen ||--o{ Pengampu : "teaches"
+    
+    MataKuliah ||--o{ Kelas : "has"
+    MataKuliah ||--o{ CPMK : "defines"
+    
+    Kelas ||--o{ Pengampu : "taught-by"
+    Kelas ||--o{ KRS : "contains"
+    Kelas ||--o{ KomponenNilai : "has"
+    
+    KomponenNilai ||--o{ BobotCPMK : "weighs"
+    KomponenNilai ||--o{ NilaiMahasiswa : "evaluates"
+    
+    CPMK ||--o{ BobotCPMK : "weighted-in"
+    CPMK }o--|| PI : "maps-to"
+    
+    PI }o--|| CPL : "contributes-to"
+    
+    User {
+        string id PK
+        string name
+        string email UK
+        string password
+        string role
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    Mahasiswa {
+        string id PK
+        string nim UK
+        string angkatan
+        string status
+        string userId FK
+    }
+    
+    Dosen {
+        string id PK
+        string nidn UK
+        string userId FK
+    }
+    
+    MataKuliah {
+        string id PK
+        string kode UK
+        string nama
+        int sks
+        int semester
+    }
+    
+    Kelas {
+        string id PK
+        string nama
+        string tahun_ajaran
+        string semester
+        string mkId FK
+    }
+    
+    Pengampu {
+        string id PK
+        string kelasId FK
+        string dosenId FK
+    }
+    
+    KRS {
+        string id PK
+        string mahasiswaId FK
+        string kelasId FK
+    }
+    
+    CPL {
+        string id PK
+        string kode UK
+        string deskripsi
+    }
+    
+    PI {
+        string id PK
+        string kode UK
+        string deskripsi
+        string cplId FK
+    }
+    
+    CPMK {
+        string id PK
+        string kode
+        string deskripsi
+        string piId FK
+        string mkId FK
+    }
+    
+    KomponenNilai {
+        string id PK
+        string nama
+        float bobot
+        string kelasId FK
+    }
+    
+    BobotCPMK {
+        string id PK
+        float bobot
+        string komponenId FK
+        string cpmkId FK
+    }
+    
+    NilaiMahasiswa {
+        string id PK
+        float nilai
+        string mahasiswaId FK
+        string komponenId FK
+    }
+`;
+
+        // Render diagram
+        async function renderDiagram() {
+            const container = document.getElementById('mermaid-diagram');
+            try {
+                const { svg } = await mermaid.render('erdGraph', erdDiagram);
+                container.innerHTML = svg;
+                
+                // Add zoom capability
+                const svgElement = container.querySelector('svg');
+                if (svgElement) {
+                    svgElement.style.width = '100%';
+                    svgElement.style.height = 'auto';
+                }
+            } catch (error) {
+                container.innerHTML = `<div style="color: red; padding: 20px;">Error rendering diagram: ${error.message}</div>`;
+            }
+        }
+
+        // Zoom functionality
+        let currentZoom = 100;
+        
+        function updateZoom() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (svg) {
+                svg.style.transform = `scale(${currentZoom / 100})`;
+                svg.style.transformOrigin = 'top center';
+                document.getElementById('zoomLevel').textContent = currentZoom + '%';
+            }
+        }
+        
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 10, 200);
+            updateZoom();
+        }
+        
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 10, 50);
+            updateZoom();
+        }
+        
+        function resetZoom() {
+            currentZoom = 100;
+            updateZoom();
+        }
+
+        // Download as PNG
+        async function downloadPNG() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Get SVG dimensions
+            const svgRect = svg.getBoundingClientRect();
+            const scale = 2; // Higher quality
+            canvas.width = svgRect.width * scale;
+            canvas.height = svgRect.height * scale;
+            
+            // White background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Convert SVG to image
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const img = new Image();
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(url);
+                
+                // Download
+                canvas.toBlob(function(blob) {
+                    const link = document.createElement('a');
+                    link.download = 'ERD_SICAL-TI_UNS.png';
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                });
+            };
+            
+            img.src = url;
+        }
+
+        // Download as SVG
+        function downloadSVG() {
+            const svg = document.querySelector('#mermaid-diagram svg');
+            if (!svg) return;
+
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            const link = document.createElement('a');
+            link.download = 'ERD_SICAL-TI_UNS.svg';
+            link.href = url;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Print diagram
+        function printDiagram() {
+            window.print();
+        }
+
+        // Set timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Render on load
+        renderDiagram();
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Sidebar from "@/components/layout/Sidebar";
-import Navbar from "@/components/layout/Navbar";
+import DashboardShell from "@/components/layout/DashboardShell";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardLayout({
   children,
@@ -11,6 +11,7 @@ export default async function DashboardLayout({
   const cookieStore = await cookies();
   const roleCookie = cookieStore.get("role");
   const nameCookie = cookieStore.get("name");
+  const userIdCookie = cookieStore.get("userId");
 
   if (!roleCookie?.value) {
     redirect("/login");
@@ -18,21 +19,40 @@ export default async function DashboardLayout({
 
   const role = roleCookie.value;
   const name = nameCookie?.value || "User";
+  const userId = userIdCookie?.value || "";
+
+  // For dosen: fetch their assigned mata kuliah for dynamic sidebar
+  let dosenMataKuliah: { kelasId: string; nama: string; kode: string; namaKelas?: string }[] = [];
+  if (role === "DOSEN" && userId) {
+    try {
+      const dosen = await prisma.dosen.findUnique({
+        where: { userId },
+        include: {
+          pengampu: {
+            include: {
+              kelas: {
+                include: { mataKuliah: true },
+              },
+            },
+          },
+        },
+      });
+      if (dosen) {
+        dosenMataKuliah = dosen.pengampu.map((p) => ({
+          kelasId: p.kelas.id,
+          nama: p.kelas.mataKuliah.nama,
+          kode: p.kelas.mataKuliah.kode,
+          namaKelas: p.kelas.nama,
+        }));
+      }
+    } catch {
+      // silently fail, sidebar will show generic menu
+    }
+  }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#eef2f7" }}>
-      <Sidebar role={role} name={name} />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Navbar role={role} name={name} />
-        <main
-          className="flex-1 overflow-y-auto p-6 md:p-8"
-          style={{ background: "#eef2f7" }}
-        >
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
+    <DashboardShell role={role} name={name} dosenMataKuliah={dosenMataKuliah}>
+      {children}
+    </DashboardShell>
   );
 }

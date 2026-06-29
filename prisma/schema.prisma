@@ -35,7 +35,6 @@ model Mahasiswa {
 model Dosen {
   id        String   @id @default(cuid())
   nidn      String   @unique
-  nip       String   @unique
   user      User     @relation(fields: [userId], references: [id])
   userId    String   @unique
 
@@ -46,6 +45,7 @@ model MataKuliah {
   id        String   @id @default(cuid())
   kode      String   @unique
   nama      String
+  nama_en   String?  // English name (optional)
   sks       Int
   semester  Int
 
@@ -75,31 +75,50 @@ model Pengampu {
 }
 
 model CPL {
-  id        String   @id @default(cuid())
-  kode      String   @unique
-  deskripsi String
-  pi        PI[]
+  id             String   @id @default(cuid())
+  kode           String   @unique
+  deskripsi      String
+  deskripsi_en   String?
+  createdBy      String   @default("system")
+  createdAt      DateTime @default(now())
+  updatedBy      String?
+  updatedAt      DateTime @updatedAt
+
+  pi         PI[]
+  bobotPiCpl BobotPI_CPL[]
 }
 
 model PI {
-  id        String   @id @default(cuid())
-  kode      String   @unique
-  deskripsi String
-  cpl       CPL      @relation(fields: [cplId], references: [id])
-  cplId     String
-  cpmk      CPMK[]
+  id             String   @id @default(cuid())
+  kode           String   @unique
+  deskripsi      String
+  cpl            CPL      @relation(fields: [cplId], references: [id])
+  cplId          String
+  createdBy      String   @default("system")
+  createdAt      DateTime @default(now())
+  updatedBy      String?
+  updatedAt      DateTime @updatedAt
+
+  cpmk        CPMK[]
+  bobotCpmkPi BobotCPMK_PI[]
+  bobotPiCpl  BobotPI_CPL[]
 }
 
 model CPMK {
-  id        String   @id @default(cuid())
-  kode      String
-  deskripsi String
-  pi        PI       @relation(fields: [piId], references: [id])
-  piId      String
-  mataKuliah MataKuliah @relation(fields: [mkId], references: [id])
-  mkId      String
+  id             String   @id @default(cuid())
+  kode           String
+  deskripsi      String
+  pi             PI       @relation(fields: [piId], references: [id])
+  piId           String
+  mataKuliah     MataKuliah @relation(fields: [mkId], references: [id])
+  mkId           String
+  createdBy      String   @default("system")
+  createdAt      DateTime @default(now())
+  updatedBy      String?
+  updatedAt      DateTime @updatedAt
 
-  bobotCpmk BobotCPMK[]
+  bobotCpmk    BobotCPMK[]
+  bobotCpmkPi  BobotCPMK_PI[]
 }
 
 model KomponenNilai {
@@ -119,7 +138,27 @@ model BobotCPMK {
   komponenId    String
   cpmk          CPMK     @relation(fields: [cpmkId], references: [id])
   cpmkId        String
-  bobot         Float    // Persentase, total untuk 1 CPMK di kelas tsb hrs 100%
+  bobot         Float    // Bobot komponen terhadap CPMK (total per CPMK = 100%)
+}
+
+// Bobot CPMK terhadap PI (total per PI = 100%)
+model BobotCPMK_PI {
+  id      String @id @default(cuid())
+  cpmk    CPMK   @relation(fields: [cpmkId], references: [id])
+  cpmkId  String
+  pi      PI     @relation(fields: [piId], references: [id])
+  piId    String
+  bobot   Float  // Bobot CPMK terhadap PI (total semua CPMK dalam satu PI = 100%)
+}
+
+// Bobot PI terhadap CPL (total per CPL = 100%)
+model BobotPI_CPL {
+  id     String @id @default(cuid())
+  pi     PI     @relation(fields: [piId], references: [id])
+  piId   String
+  cpl    CPL    @relation(fields: [cplId], references: [id])
+  cplId  String
+  bobot  Float  // Bobot PI terhadap CPL (total semua PI dalam satu CPL = 100%)
 }
 
 model NilaiMahasiswa {
@@ -129,6 +168,8 @@ model NilaiMahasiswa {
   komponen      KomponenNilai @relation(fields: [komponenId], references: [id])
   komponenId    String
   nilai         Float    // 0 - 100
+  lastUpdatedBy String?  // User ID or name of dosen who last updated
+  updatedAt     DateTime @default(now()) @updatedAt
 }
 
 model KRS {

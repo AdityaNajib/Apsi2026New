@@ -23,76 +23,111 @@ async function main() {
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  // Create Users
-  const kaprodiUser = await prisma.user.create({
+  // ═══════════════════════════════════════════════════════════════
+  // ✏️  EDIT DATA KAPRODI, JAMU, ADMIN DI SINI
+  // ═══════════════════════════════════════════════════════════════
+
+  // KAPRODI — email @kaprodi.uns.ac.id
+  await prisma.user.create({
     data: {
       id: 'kaprodi-001',
       name: 'Dr. Wakhid Ahmad Jauhari, S.T., M.T.',
-      email: 'wakhidjauhari@staff.uns.ac.id',
+      email: 'wakhidjauhari@kaprodi.uns.ac.id',
       password: hashedPassword,
       role: 'KAPRODI',
     },
   });
 
-  const adminUser = await prisma.user.create({
+  // PENJAMINAN MUTU — email @jamu.uns.ac.id
+  await prisma.user.create({
+    data: {
+      id: 'jamu-001',
+      name: 'Dr. Ratna Puspitasari, S.T., M.T.',
+      email: 'ratna@jamu.uns.ac.id',
+      password: hashedPassword,
+      role: 'JAMU',
+    },
+  });
+
+  // ADMIN — email @admin.uns.ac.id
+  await prisma.user.create({
     data: {
       id: 'admin-001',
       name: 'Budi Santoso, S.Kom.',
-      email: 'admin@staff.uns.ac.id',
+      email: 'budi@admin.uns.ac.id',
       password: hashedPassword,
       role: 'ADMIN',
     },
   });
 
-  const dosenUser = await prisma.user.create({
-    data: {
-      id: 'dosen-001',
+  // ═══════════════════════════════════════════════════════════════
+  // ✏️  EDIT DATA DOSEN DI SINI
+  //     Format: { name, email, nidn }
+  //     - email harus @staff.uns.ac.id
+  //     - nidn harus unik
+  // ═══════════════════════════════════════════════════════════════
+  const dosenData = [
+    {
       name: 'Ir. Joko Widodo, M.T.',
-      email: 'dosen@staff.uns.ac.id',
-      password: hashedPassword,
-      role: 'DOSEN',
-    },
-  });
-
-  const dosen2User = await prisma.user.create({
-    data: {
-      id: 'dosen-002',
-      name: 'Dr. Siti Nurhaliza, S.T., M.Eng.',
-      email: 'siti@staff.uns.ac.id',
-      password: hashedPassword,
-      role: 'DOSEN',
-    },
-  });
-
-  // Create Dosen
-  const dosen1 = await prisma.dosen.create({
-    data: {
+      email: 'joko.widodo@staff.uns.ac.id',
       nidn: '0612108901',
-      nip: '198912120001',
-      userId: dosenUser.id,
     },
-  });
-
-  const dosen2 = await prisma.dosen.create({
-    data: {
+    {
+      name: 'Dr. Siti Nurhaliza, S.T., M.Eng.',
+      email: 'siti.nurhaliza@staff.uns.ac.id',
       nidn: '0615109002',
-      nip: '199015150002',
-      userId: dosen2User.id,
     },
-  });
+    // Tambah dosen baru di bawah ini:
+    // {
+    //   name: 'Nama Dosen',
+    //   email: 'namadosen@staff.uns.ac.id',
+    //   nidn: '0612345678',
+    // },
+  ];
 
-  // Create Mahasiswa
+  // Buat semua akun dosen
+  const dosenList: { id: string }[] = [];
+  for (const d of dosenData) {
+    const user = await prisma.user.create({
+      data: {
+        name: d.name,
+        email: d.email,
+        password: hashedPassword,
+        role: 'DOSEN',
+      },
+    });
+    const dosen = await prisma.dosen.create({
+      data: {
+        nidn: d.nidn,
+        userId: user.id,
+      },
+    });
+    dosenList.push(dosen);
+  }
+
+  // Shortcut ke dosen pertama & kedua (untuk assign ke kelas di bawah)
+  const dosen1 = dosenList[0];
+  const dosen2 = dosenList[1] ?? dosenList[0];
+
+  // ═══════════════════════════════════════════════════════════════
+  // ✏️  EDIT DATA MAHASISWA DI SINI
+  //     Format: { nim, name, email, angkatan }
+  //     - email harus @student.uns.ac.id
+  //     - nim harus unik
+  // ═══════════════════════════════════════════════════════════════
   const mahasiswaData = [
-    { nim: 'I0323001', name: 'Aditya Pratama', email: 'aditya@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323002', name: 'Budi Santoso', email: 'budi@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323003', name: 'Citra Dewi', email: 'citra@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323004', name: 'Dian Purnama', email: 'dian@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323005', name: 'Eka Wijaya', email: 'eka@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323006', name: 'Fajar Ramadhan', email: 'fajar@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323007', name: 'Gita Savitri', email: 'gita@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323008', name: 'Hendra Kusuma', email: 'hendra@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323009', name: 'Indah Permata', email: 'indah@student.uns.ac.id', angkatan: '2023' },
-    { nim: 'I0323010', name: 'Joko Susilo', email: 'joko@student.uns.ac.id', angkatan: '2023' },
+    { nim: 'I0323001', name: 'Aditya Pratama',   email: 'aditya@student.uns.ac.id',  angkatan: '2023' },
+    { nim: 'I0323002', name: 'Budi Santoso',      email: 'budi@student.uns.ac.id',    angkatan: '2023' },
+    { nim: 'I0323003', name: 'Citra Dewi',        email: 'citra@student.uns.ac.id',   angkatan: '2023' },
+    { nim: 'I0323004', name: 'Dian Purnama',      email: 'dian@student.uns.ac.id',    angkatan: '2023' },
+    { nim: 'I0323005', name: 'Eka Wijaya',        email: 'eka@student.uns.ac.id',     angkatan: '2023' },
+    { nim: 'I0323006', name: 'Fajar Ramadhan',    email: 'fajar@student.uns.ac.id',   angkatan: '2023' },
+    { nim: 'I0323007', name: 'Gita Savitri',      email: 'gita@student.uns.ac.id',    angkatan: '2023' },
+    { nim: 'I0323008', name: 'Hendra Kusuma',     email: 'hendra@student.uns.ac.id',  angkatan: '2023' },
+    { nim: 'I0323009', name: 'Indah Permata',     email: 'indah@student.uns.ac.id',   angkatan: '2023' },
+    { nim: 'I0323010', name: 'Joko Susilo',       email: 'joko@student.uns.ac.id',    angkatan: '2023' },
+    // Tambah mahasiswa baru di bawah ini:
+    // { nim: 'I0323011', name: 'Nama Mahasiswa', email: 'nama@student.uns.ac.id', angkatan: '2023' },
   ];
 
   const mahasiswaList = [];
@@ -328,11 +363,11 @@ async function main() {
     });
   }
 
-  // Create Admin with Dosen profile
+  // Admin kedua (opsional, hapus jika tidak perlu)
   const admin2User = await prisma.user.create({
     data: {
       name: 'Siti Aminah, S.T., M.Kom.',
-      email: 'siti.admin@staff.uns.ac.id',
+      email: 'siti@admin.uns.ac.id',
       password: hashedPassword,
       role: 'ADMIN',
     },
@@ -341,7 +376,6 @@ async function main() {
   await prisma.dosen.create({
     data: {
       nidn: '0618109103',
-      nip: '199118180003',
       userId: admin2User.id,
     },
   });
@@ -580,7 +614,7 @@ async function main() {
 
   console.log('✅ Seed completed successfully!');
   console.log('\n📊 Summary:');
-  console.log('- Users: 14 (1 Kaprodi, 2 Admin, 2 Dosen, 10 Mahasiswa)');
+  console.log('- Users: 15 (1 Kaprodi, 1 Jamu, 2 Admin, 2 Dosen, 10 Mahasiswa)');
   console.log('- Mata Kuliah: 4');
   console.log('- Kelas: 4');
   console.log('- Pengampu: 4 (Dosen 1 mengampu semua kelas)');
@@ -595,15 +629,10 @@ async function main() {
   console.log('- PI: 8 (Performance Indicators)');
   console.log('- CPMK: 9 (tersebar di 4 mata kuliah)');
   console.log('\n🔑 Login credentials:');
-  console.log('- Kaprodi: wakhidjauhari@staff.uns.ac.id / password123');
-  console.log('  → Dr. Wakhid Ahmad Jauhari, S.T., M.T.');
-  console.log('- Admin: admin@staff.uns.ac.id / password123');
-  console.log('- Dosen: dosen@staff.uns.ac.id / password123');
-  console.log('  → Mengampu 4 mata kuliah:');
-  console.log('    1. TI2023 - Sistem Basis Data (8 mhs) ✅ Ada nilai');
-  console.log('    2. TI1014 - Algoritma Pemrograman (7 mhs)');
-  console.log('    3. TI3055 - Kecerdasan Buatan (6 mhs)');
-  console.log('    4. TI4012 - Manajemen Proyek (5 mhs)');
+  console.log('- Kaprodi:   wakhidjauhari@kaprodi.uns.ac.id / password123');
+  console.log('- Jamu:      ratna@jamu.uns.ac.id / password123');
+  console.log('- Admin:     budi@admin.uns.ac.id / password123');
+  console.log('- Dosen:     dosen@staff.uns.ac.id / password123');
   console.log('- Mahasiswa: aditya@student.uns.ac.id / password123');
 }
 

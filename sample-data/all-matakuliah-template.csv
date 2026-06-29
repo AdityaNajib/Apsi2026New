@@ -1,0 +1,138 @@
+kode,nama,sks,semester
+08033143001,Kalkulus I,3,1
+08033143002,Fisika I,3,1
+08033142003,Kimia,2,1
+08033142004,Biologi,2,1
+08033142005,Pengantar Teknik Industri,2,1
+08033142006,Ekologi Industri,2,1
+08033142007,Menggambar Teknik,2,1
+08033142008,Algoritma dan Pemrograman Komputer,2,1
+08033112001,Pendidikan Agama Budha,2,1
+08033112002,Pendidikan Agama Hindu,2,1
+08033112003,Pendidikan Agama Islam,2,1
+08033112004,Pendidikan Agama Katolik,2,1
+08033112005,Pendidikan Agama Kong Hucu,2,1
+08033112006,Pendidikan Agama Kristen Protestan,2,1
+08033112008,Kewarganegaraan,2,1
+08033112101,Pendidikan Agama Islam,2,1
+08033112102,Pendidikan Agama Kristen Protestan,2,1
+08033112103,Pendidikan Agama Katolik,2,1
+08033112104,Pendidikan Agama Hindu,2,1
+08033112105,Pendidikan Agama Budha,2,1
+08033112106,Pendidikan Agama Kong Hucu,2,1
+08033122005,Bahasa Inggris,2,1
+08033243010,Kalkulus II,3,2
+08033243011,Fisika II,3,2
+08033241012,Praktikum Fisika,2,2
+08033242013,Material Teknik,2,2
+08033242014,Mekanika Teknik,2,2
+08033242015,Ergonomi Kerja,2,2
+08033242016,Pengantar Pengembangan Produk,2,2
+08033242017,Analisis dan Pengendalian Biaya,2,2
+08033242018,Proses Manufaktur I,2,2
+08033142021,Pengukuran dan Perancangan Sistem Kerja,2,3
+08033142022,Mekatronika,2,3
+08033142023,Proses Manufaktur II,2,3
+08033142024,Elemen Mesin,2,3
+08033142025,Perilaku Organisasi,2,3
+08033142027,Manajemen Pemasaran,2,3
+08033142028,Praktikum Perancangan Teknik Industri I,2,3
+08033143019,Aljabar Linear,3,3
+08033143020,Teori Probabilitas,3,3
+08033143026,Ekonomika dan Ekonomi Teknik,3,3
+08033242033,Keselamatan dan Kesehatan Kerja,2,4
+08033242034,Perancangan Fasilitas,2,4
+08033242035,Analisis Sistem Produksi,2,4
+08033242036,Praktikum Perancangan Teknik Industri II,2,4
+08033243029,Matematika Optimasi,3,4
+08033243030,Statistika,3,4
+08033243031,Riset Operasi I,3,4
+08033244032,Perencanaan dan Pengendalian Produksi,4,4
+08033242037,Pancasila,2,4
+08033122045,Kewirausahaan,2,5
+08033122047,Kerja Praktek,2,5
+08033123047,Kerja Praktek,3,5
+08033142038,Analitika Data,2,5
+08033142039,Otomatisasi Sistem,2,5
+08033142041,Pemodelan Sistem,2,5
+08033142042,Sistem Rantai Pasok,2,5
+08033142043,Biomekanika Kerja,2,5
+08033142044,Manajemen Proyek,2,5
+08033142046,Praktikum Perancangan Teknik Industri III,2,5
+08033143040,Riset Operasi II,3,5
+08033222001,Kuliah Kerja Nyata,2,6
+08033242049,Perancangan Eksperimen,2,6
+08033242050,Pengendalian dan Penjaminan Mutu,3,6
+08033242052,Analisis dan Perancangan Sistem Informasi,2,6
+08033242053,Metodologi Penelitian,2,6
+08033242054,Praktikum Perancangan Teknik Industri IV,2,6
+08033242056,Bahasa Indonesia,2,6
+08033243048,Simulasi Sistem,3,6
+08033243051,Perancangan dan Manajemen Organisasi Industri,3,6
+08033353001,Teori Penjadwalan,3,6
+08033353002,Teori Persediaan,3,6
+08033353003,Perancangan Six Sigma,3,6
+08033353004,Rekayasa Pemasaran,3,6
+08033353005,Perancangan Toleransi,3,6
+08033353006,Pengambilan Keputusan Kriteria Majemuk,3,6
+08033353007,Analisis Sistem Manufaktur,3,6
+08033353008,Manufaktur Cerdas,3,6
+08033353009,Robotika Modern,3,6
+08033353010,Ergonomi Fisik,3,6
+08033353011,Ergonomi Kognitif,3,6
+08033353012,Ergonomi Lingkungan,3,6
+08033353013,Ergonomi untuk Orang Berkebutuhan Khusus,3,6
+08033353014,Perbaikan Metode Kerja,3,6
+08033353015,Ekologi Industri,3,6
+08033353016,Aplikasi Ergonomi Industri,3,6
+08033353017,Perancangan Material Handling Ramah Lingkungan (Karakuri),3,6
+08033353018,Analisa Multivariat,3,6
+08033353019,Rekayasa Kualitas,3,6
+08033353020,Sistem Manajemen Mutu,3,6
+08033353021,Standardisasi,3,6
+08033353022,Manajemen kompleksitas,3,6
+08033353023,Analisis Komparasi Kuantitatif,3,6
+08033353024,Perancangan Eksperimen,3,6
+08033353025,Sistem Pendukung Keputusan,3,6
+08033353026,Sistem Informasi Enterprise,3,6
+08033353027,Manajemen Industri Kecil dan Menengah,3,6
+08033353028,Manajemen Perawatan,3,6
+08033353029,Dinamika Sistem,3,6
+08033353030,Metaheuristik,3,6
+08033353031,Pemodelan dan Simulasi berbasis Agen,3,6
+08033353032,Strategi dan kebijakan industri,3,6
+08033353033,Pengukuran Kinerja,3,6
+08033353034,Manajemen Strategi,3,6
+08033353035,Ekonomi Industri,3,6
+08033353036,Kewirausahaan Berbasis Teknologi,3,6
+08033353037,Analisis Tekno Ekonomi untuk Sistem Logistik,3,6
+08033353038,Perancangan Jaringan Rantai Pasok,3,6
+08033353039,Analisis Daya Saing Perusahaan,3,6
+08033353040,Manajemen Sumber Daya Manusia,3,6
+08033353041,Analisis dan Perancangan Perusahaan,3,6
+08033353042,Manajemen Rantai Pasok yang Berkelanjutan,3,6
+08033353043,Mekanisme Sistem Mekanik,3,6
+08033353044,Kreativitas dan Inovasi Produk,3,6
+08033353045,Manajemen Pengembangan Teknologi,3,6
+08033353046,Manufaktur Komposit Alam,3,6
+08033353047,Standar Pengujian Material dan Produk Eksperimental,3,6
+08033353048,Manajemen Mesin Perkakas,3,6
+08033353049,Rekayasa Balik dan Manufaktur Aditif,3,6
+08033353050,Teknologi Asistif dan Augmentatif,3,6
+08033353051,Teknologi Bioinstrumentasi,3,6
+08033353052,Studi Interaksi Pengguna dan Eksperimentasi Manusia,3,6
+08033353053,Strategi Pengurangan Biaya Produk,3,6
+08033353054,Desain dan Rekayasa Kemasan,3,6
+08033353055,Kapita Selekta Perencanaan dan Perancangan Produk,3,6
+08033353056,Etik Nilai dan Desain Teknologi,3,6
+08033122002,Kerja Praktek,2,7
+08033122060,Kuliah Kerja Nyata,2,7
+08033122062,Bahasa Inggris,2,7
+08033123060,Kuliah Kerja Nyata,3,7
+08033142057,Proyek Perancangan Terpadu I,2,7
+08033142058,Proyek Perancangan Terpadu I,2,7
+08033142061,Kewarganegaraan,2,7
+08033354018,Modul Nusantara,4,7
+08033224004,Tugas Akhir,4,8
+08033242063,Proyek Perancangan Terpadu II,2,8
+08033242064,Skripsi,2,8

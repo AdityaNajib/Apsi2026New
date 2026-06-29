@@ -1,0 +1,117 @@
+erDiagram
+    User ||--o| Mahasiswa : "has"
+    User ||--o| Dosen : "has"
+    
+    Mahasiswa ||--o{ KRS : "enrolls"
+    Mahasiswa ||--o{ NilaiMahasiswa : "has"
+    
+    Dosen ||--o{ Pengampu : "teaches"
+    
+    MataKuliah ||--o{ Kelas : "has"
+    MataKuliah ||--o{ CPMK : "defines"
+    
+    Kelas ||--o{ Pengampu : "taught-by"
+    Kelas ||--o{ KRS : "contains"
+    Kelas ||--o{ KomponenNilai : "has"
+    
+    KomponenNilai ||--o{ BobotCPMK : "weighs"
+    KomponenNilai ||--o{ NilaiMahasiswa : "evaluates"
+    
+    CPMK ||--o{ BobotCPMK : "weighted-in"
+    CPMK }o--|| PI : "maps-to"
+    
+    PI }o--|| CPL : "contributes-to"
+    
+    User {
+        string id PK
+        string name
+        string email UK
+        string password
+        string role
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    Mahasiswa {
+        string id PK
+        string nim UK
+        string angkatan
+        string status
+        string userId FK
+    }
+    
+    Dosen {
+        string id PK
+        string nidn UK
+        string userId FK
+    }
+    
+    MataKuliah {
+        string id PK
+        string kode UK
+        string nama
+        int sks
+        int semester
+    }
+    
+    Kelas {
+        string id PK
+        string nama
+        string tahun_ajaran
+        string semester
+        string mkId FK
+    }
+    
+    Pengampu {
+        string id PK
+        string kelasId FK
+        string dosenId FK
+    }
+    
+    KRS {
+        string id PK
+        string mahasiswaId FK
+        string kelasId FK
+    }
+    
+    CPL {
+        string id PK
+        string kode UK
+        string deskripsi
+    }
+    
+    PI {
+        string id PK
+        string kode UK
+        string deskripsi
+        string cplId FK
+    }
+    
+    CPMK {
+        string id PK
+        string kode
+        string deskripsi
+        string piId FK
+        string mkId FK
+    }
+    
+    KomponenNilai {
+        string id PK
+        string nama
+        float bobot
+        string kelasId FK
+    }
+    
+    BobotCPMK {
+        string id PK
+        float bobot
+        string komponenId FK
+        string cpmkId FK
+    }
+    
+    NilaiMahasiswa {
+        string id PK
+        float nilai
+        string mahasiswaId FK
+        string komponenId FK
+    }

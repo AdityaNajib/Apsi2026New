@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get dosen data
+    // Get dosen data with pengampu (teaching assignments)
     const dosen = await prisma.dosen.findUnique({
       where: { userId: userIdCookie.value },
       include: {
@@ -37,7 +37,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Dosen not found' }, { status: 404 });
     }
 
-    // Transform data
+    // AUTHORIZATION: Only return mata kuliah where dosen is assigned as pengampu
+    // This ensures dosen can ONLY see courses they are authorized to teach
     const mataKuliah = dosen.pengampu.map((p) => ({
       kelasId: p.kelas.id,
       kode: p.kelas.mataKuliah.kode,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { validateKode } from "@/lib/kodeValidation";
 
 // POST - Create new PI
 export async function POST(request: NextRequest) {
@@ -7,11 +8,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { kode, deskripsi, cplId } = body;
 
-    // Check if kode already exists
-    const existing = await prisma.pI.findUnique({
-      where: { kode },
-    });
+    const kodeErr = validateKode("pi", kode ?? "");
+    if (kodeErr) return NextResponse.json({ error: kodeErr }, { status: 400 });
 
+    const existing = await prisma.pI.findUnique({ where: { kode } });
     if (existing) {
       return NextResponse.json({ error: "Kode PI sudah ada" }, { status: 400 });
     }
@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
         _count: { select: { cpmk: true } },
       },
     });
-
     return NextResponse.json(pi);
   } catch (error) {
     console.error("Error creating PI:", error);
@@ -37,6 +36,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { id, kode, deskripsi, cplId } = body;
 
+    const kodeErr = validateKode("pi", kode ?? "");
+    if (kodeErr) return NextResponse.json({ error: kodeErr }, { status: 400 });
+
     const pi = await prisma.pI.update({
       where: { id },
       data: { kode, deskripsi, cplId },
@@ -45,7 +47,6 @@ export async function PUT(request: NextRequest) {
         _count: { select: { cpmk: true } },
       },
     });
-
     return NextResponse.json(pi);
   } catch (error) {
     console.error("Error updating PI:", error);

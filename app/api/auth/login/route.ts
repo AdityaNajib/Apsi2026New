@@ -3,9 +3,32 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 
+// Map email domain to expected role
+const DOMAIN_ROLE_MAP: Record<string, string> = {
+  'student.uns.ac.id': 'MAHASISWA',
+  'staff.uns.ac.id':   'DOSEN',    // dosen & admin share @staff.uns.ac.id, role ditentukan dari DB
+  'admin.uns.ac.id':   'ADMIN',
+  'kaprodi.uns.ac.id': 'KAPRODI',
+  'jamu.uns.ac.id':    'JAMU',
+};
+
+function getDomainFromEmail(email: string): string {
+  return email.split('@')[1]?.toLowerCase() ?? '';
+}
+
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
+
+    const domain = getDomainFromEmail(email);
+    const expectedRole = DOMAIN_ROLE_MAP[domain];
+
+    if (!expectedRole) {
+      return NextResponse.json(
+        { error: 'Domain email tidak dikenali. Gunakan email institusi UNS yang valid.' },
+        { status: 401 }
+      );
+    }
 
     // Find user by email
     const user = await prisma.user.findUnique({
@@ -25,8 +48,22 @@ export async function POST(request: Request) {
 
     // Compare password with bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: 'Email atau password salah' },
+        { status: 401 }
+      );
+    }
+
+    // Validate domain matches role in DB
+    // @staff.uns.ac.id dipakai bersama oleh DOSEN dan ADMIN
+    const isStaffDomain = domain === 'staff.uns.ac.id';
+    const roleMatches = isStaffDomain
+      ? (user.role === 'DOSEN' || user.role === 'ADMIN')
+      : user.role === expectedRole;
+
+    if (!roleMatches) {
       return NextResponse.json(
         { error: 'Email atau password salah' },
         { status: 401 }
@@ -71,6 +108,9 @@ export async function POST(request: Request) {
         break;
       case 'MAHASISWA':
         redirectPath = '/mahasiswa';
+        break;
+      case 'JAMU':
+        redirectPath = '/jamu';
         break;
     }
 

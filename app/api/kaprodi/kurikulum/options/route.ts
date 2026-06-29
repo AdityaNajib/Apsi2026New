@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET - Get options for dropdowns (CPL list, MK list)
+// GET - Get options for dropdowns (CPL list, MK list, CPMK list)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -29,6 +29,14 @@ export async function GET(request: NextRequest) {
         orderBy: { kode: "asc" },
       });
       return NextResponse.json(mkList);
+    }
+
+    if (type === "cpmk") {
+      const cpmkList = await prisma.cPMK.findMany({
+        select: { id: true, kode: true, deskripsi: true, mkId: true },
+        orderBy: { kode: "asc" },
+      });
+      return NextResponse.json(cpmkList);
     }
 
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });

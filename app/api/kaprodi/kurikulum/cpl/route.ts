@@ -1,25 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { validateKode } from "@/lib/kodeValidation";
 
 // POST - Create new CPL
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { kode, deskripsi } = body;
+    const { kode, deskripsi, deskripsi_en } = body;
 
-    // Check if kode already exists
-    const existing = await prisma.cPL.findUnique({
-      where: { kode },
-    });
+    const kodeErr = validateKode("cpl", kode ?? "");
+    if (kodeErr) return NextResponse.json({ error: kodeErr }, { status: 400 });
 
+    const existing = await prisma.cPL.findUnique({ where: { kode } });
     if (existing) {
       return NextResponse.json({ error: "Kode CPL sudah ada" }, { status: 400 });
     }
 
     const cpl = await prisma.cPL.create({
-      data: { kode, deskripsi },
+      data: { kode, deskripsi, deskripsi_en: deskripsi_en || undefined },
     });
-
     return NextResponse.json(cpl);
   } catch (error) {
     console.error("Error creating CPL:", error);
@@ -31,13 +30,15 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, kode, deskripsi } = body;
+    const { id, kode, deskripsi, deskripsi_en } = body;
+
+    const kodeErr = validateKode("cpl", kode ?? "");
+    if (kodeErr) return NextResponse.json({ error: kodeErr }, { status: 400 });
 
     const cpl = await prisma.cPL.update({
       where: { id },
-      data: { kode, deskripsi },
+      data: { kode, deskripsi, deskripsi_en: deskripsi_en || undefined },
     });
-
     return NextResponse.json(cpl);
   } catch (error) {
     console.error("Error updating CPL:", error);

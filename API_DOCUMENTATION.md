@@ -1,549 +1,370 @@
-# 📡 API Documentation - Dashboard Dosen
+# 📡 API Documentation — SICAL-TI UNS
 
-## Base URL
-```
-http://localhost:3000/api/dosen
-```
+Base URL: `http://localhost:3000/api`
 
----
-
-## 🔐 Authentication
-Semua endpoint menggunakan **cookie-based authentication**:
-- Cookie `userId` harus ada
-- Cookie `role` harus `DOSEN`
+> Semua endpoint sensitif belum memiliki middleware auth tersendiri — proteksi dilakukan di level layout dashboard via cookie check.
 
 ---
 
-## 📚 Endpoints
+## Auth
 
-### 1. Get Mata Kuliah Diampu
+### POST `/api/auth/login`
+Login pengguna. Role dideteksi otomatis dari domain email.
 
-**GET** `/api/dosen/mata-kuliah`
+**Body:** `{ email, password }`
 
-Mendapatkan daftar mata kuliah yang diampu oleh dosen yang sedang login.
+**Response:** `{ success, user: { id, name, email, role }, redirectPath }`
 
-#### Request
-```http
-GET /api/dosen/mata-kuliah HTTP/1.1
-Cookie: userId=dosen-001; role=DOSEN
-```
+| Domain | Role |
+|--------|------|
+| `@kaprodi.uns.ac.id` | KAPRODI |
+| `@jamu.uns.ac.id` | JAMU |
+| `@admin.uns.ac.id` | ADMIN |
+| `@staff.uns.ac.id` | DOSEN |
+| `@student.uns.ac.id` | MAHASISWA |
 
-#### Response Success (200)
+### POST `/api/auth/logout`
+Hapus semua auth cookies. Response: `{ success: true }`
+
+---
+
+## Mahasiswa
+
+### GET `/api/mahasiswa/profile`
+Profil mahasiswa yang sedang login (by `userId` cookie).
+
+### GET `/api/mahasiswa/cpl`
+Hasil perhitungan CPL mahasiswa yang sedang login.
+
+### GET `/api/mahasiswa/riwayat`
+Riwayat nilai per semester dengan IPS dan IPK otomatis.
+
+---
+
+## Dosen
+
+### GET `/api/dosen/mata-kuliah`
+Daftar mata kuliah + kelas yang diampu dosen yang sedang login.
+
+### GET `/api/dosen/mahasiswa/[kelasId]`
+Daftar mahasiswa + komponen nilai dalam satu kelas.
+
+### GET `/api/dosen/nilai-batch?kelasId=`
+Semua nilai dalam satu kelas, satu request (fix N+1).  
+Response: `{ [mahasiswaId]: { [komponenId]: nilai } }`
+
+### POST `/api/dosen/nilai-batch`
+Batch upsert semua nilai sekaligus.  
+**Body:** `{ items: [{ mahasiswaId, komponenId, nilai }] }`
+
+### GET `/api/dosen/nilai?mahasiswaId=&komponenId=`
+Nilai satu mahasiswa untuk satu komponen.
+
+### POST `/api/dosen/nilai`
+Upsert nilai satu record. **Body:** `{ mahasiswaId, komponenId, nilai (0-100) }`
+
+### GET `/api/dosen/komponen-nilai?kelasId=`
+Daftar komponen nilai satu kelas.
+
+### POST `/api/dosen/komponen-nilai`
+Tambah komponen. **Body:** `{ kelasId, nama, bobot }`
+
+### PUT `/api/dosen/komponen-nilai`
+Update komponen. **Body:** `{ id, nama, bobot }`
+
+### DELETE `/api/dosen/komponen-nilai?id=`
+Hapus komponen (cascade: hapus semua nilai & bobot CPMK terkait).
+
+### GET `/api/dosen/rekap/[kelasId]`
+Rekap nilai akhir + huruf mutu semua mahasiswa di kelas.
+
+---
+
+## Admin — Kelas
+
+### GET `/api/admin/kelas`
+Semua kelas beserta dosen pengampu, jumlah mahasiswa, dan komponen nilai.
+
+### POST `/api/admin/kelas`
+Buat kelas. **Body:** `{ mkId, nama, tahunAjaran, semester }`
+
+### DELETE `/api/admin/kelas?id=`
+Hapus kelas (cascade: nilai, KRS, pengampu, komponen).
+
+### POST `/api/admin/kelas/pengampu`
+Assign dosen ke kelas. **Body:** `{ kelasId, dosenId }`
+
+### DELETE `/api/admin/kelas/pengampu?id=`
+Lepas dosen dari kelas (`id` = pengampuId).
+
+### GET `/api/admin/kelas/mahasiswa?kelasId=`
+Daftar mahasiswa dalam kelas tertentu.
+
+---
+
+## Admin — Import Data
+
+### POST `/api/admin/import/dosen`
+Import data dosen dari CSV.
+
+**Form-data:** `file` (CSV file)
+
+**Format CSV:** `name,email,nidn`
+
+**Response:** `{ successCount, errorCount, results[] }`
+
+### POST `/api/admin/import/mahasiswa`
+Import data mahasiswa dari CSV.
+
+**Form-data:** `file` (CSV file)
+
+**Response:** `{ successCount, errorCount, results[] }`
+
+### POST `/api/admin/import/mata-kuliah`
+Import data mata kuliah dari CSV.
+
+**Form-data:** `file` (CSV file)
+
+**Query params:** `?mode=skip|update` (default: skip)
+
+**Format CSV:** `kode,nama,sks,semester`
+
+**Response:** `{ successCount, updatedCount, skipCount, errorCount, results[] }`
+
+### POST `/api/admin/import/kelas`
+Import data kelas beserta dosen pengampu dari CSV.
+
+**Form-data:** `file` (CSV file)
+
+**Format CSV:** `kode_mk,nama_kelas,tahun_ajaran,semester,nidn_dosen`
+
+**Note:** `nidn_dosen` bisa multiple (pisahkan dengan `|`)
+
+**Response:** `{ successCount, skipCount, errorCount, results[] }`
+
+### POST `/api/admin/import/pengampu`
+Import data pengampu (dosen mengajar mata kuliah + kelas) dari CSV.
+
+**Form-data:** `file` (CSV file)
+
+**Query params:** 
+- `?tahun_ajaran=2026/2027` (optional, default: 2026/2027)
+- `?semester=Ganjil` (optional, default: Ganjil)
+
+**Format CSV:** `kode_mk,nama_mk,nama_dosen,kelas,tahun_ajaran,semester`
+
+**Format nama_dosen:** `NIDN - Nama Lengkap` (contoh: "JUM001 - Jumiyanto Widodo S.Sos. M.Si.")
+
+**Fitur:**
+- Auto-create mata kuliah jika belum ada
+- Auto-create kelas jika belum ada
+- Extract SKS dari nama mata kuliah (format: "Nama (X SKS)")
+- Extract NIDN dari nama dosen
+- Skip jika dosen sudah mengampu kelas tersebut
+
+**Response:** 
 ```json
-[
-  {
-    "kelasId": "cls_123",
-    "kode": "TI2023",
-    "nama": "Sistem Basis Data",
-    "namaKelas": "A",
-    "sks": 3,
-    "semester": 3,
-    "tahunAjaran": "2026/2027",
-    "semesterKelas": "Ganjil",
-    "jumlahMahasiswa": 40,
-    "komponenNilai": [
-      {
-        "id": "komp_1",
-        "nama": "UTS",
-        "bobot": 30
-      },
-      {
-        "id": "komp_2",
-        "nama": "UAS",
-        "bobot": 40
-      }
-    ]
+{
+  "successCount": 150,
+  "skipCount": 20,
+  "warningCount": 5,
+  "errorCount": 3,
+  "results": [],
+  "summary": {
+    "total": 178,
+    "processed": 175,
+    "failed": 3
   }
-]
-```
-
-#### Response Error (401)
-```json
-{
-  "error": "Unauthorized"
 }
 ```
 
----
+**Dokumentasi lengkap:** Lihat `IMPORT_PENGAMPU_GUIDE.md`
 
-### 2. Get Mahasiswa by Kelas
+### POST `/api/admin/import/kelas-mahasiswa`
+Import data mahasiswa ke kelas (KRS) dari CSV.
 
-**GET** `/api/dosen/mahasiswa/[kelasId]`
+**Form-data:** `file` (CSV file)
 
-Mendapatkan daftar mahasiswa yang terdaftar di kelas tertentu.
+**Response:** `{ successCount, errorCount, results[] }`
 
-#### Request
-```http
-GET /api/dosen/mahasiswa/cls_123 HTTP/1.1
-```
+### POST `/api/admin/import/nilai`
+Import data nilai dari CSV.
 
-#### Response Success (200)
-```json
-{
-  "mahasiswa": [
-    {
-      "id": "mhs_1",
-      "nim": "I0323001",
-      "nama": "Aditya Pratama",
-      "angkatan": "2023",
-      "status": "AKTIF"
-    }
-  ],
-  "komponenNilai": [
-    {
-      "id": "komp_1",
-      "nama": "UTS",
-      "bobot": 30,
-      "nilaiMahasiswa": []
-    }
-  ]
-}
-```
+**Form-data:** `file` (CSV file)
+
+**Response:** `{ successCount, errorCount, results[] }`
+Daftar mahasiswa di kelas.
+
+### POST `/api/admin/kelas/mahasiswa`
+Enroll mahasiswa. **Body:** `{ kelasId, mahasiswaId }`
+
+### DELETE `/api/admin/kelas/mahasiswa?krsId=`
+Unenroll mahasiswa (cascade: hapus nilai di kelas tersebut).
 
 ---
 
-### 3. Get Nilai Mahasiswa
+## Admin — Mata Kuliah
 
-**GET** `/api/dosen/nilai?mahasiswaId={id}&komponenId={id}`
+### GET `/api/admin/mata-kuliah`
+Semua mata kuliah dengan `_count.kelas` dan `_count.cpmk`.
 
-Mendapatkan nilai mahasiswa untuk komponen tertentu.
+### POST `/api/admin/mata-kuliah`
+Tambah MK. **Body:** `{ kode, nama, sks, semester }`
 
-#### Request
-```http
-GET /api/dosen/nilai?mahasiswaId=mhs_1&komponenId=komp_1 HTTP/1.1
-```
+### PUT `/api/admin/mata-kuliah`
+Update MK. **Body:** `{ id, kode?, nama?, sks?, semester? }`
 
-#### Response Success (200)
-```json
-{
-  "id": "nilai_1",
-  "mahasiswaId": "mhs_1",
-  "komponenId": "komp_1",
-  "nilai": 85
-}
-```
-
-#### Response Not Found (200)
-```json
-null
-```
+### DELETE `/api/admin/mata-kuliah?id=`
+Hapus MK. Gagal jika masih ada kelas yang menggunakannya.
 
 ---
 
-### 4. Create/Update Nilai Mahasiswa
+## Admin — Nilai
 
-**POST** `/api/dosen/nilai`
+### GET `/api/admin/nilai?kelasId=`
+Semua nilai mahasiswa di kelas (untuk halaman input nilai admin).
 
-Membuat atau mengupdate nilai mahasiswa.
-
-#### Request
-```http
-POST /api/dosen/nilai HTTP/1.1
-Content-Type: application/json
-
-{
-  "mahasiswaId": "mhs_1",
-  "komponenId": "komp_1",
-  "nilai": 85
-}
-```
-
-#### Response Success (200)
-```json
-{
-  "id": "nilai_1",
-  "mahasiswaId": "mhs_1",
-  "komponenId": "komp_1",
-  "nilai": 85
-}
-```
-
-#### Response Error (400)
-```json
-{
-  "error": "Missing required fields"
-}
-```
+### POST `/api/admin/nilai`
+Upsert nilai. **Body:** `{ mahasiswaId, komponenId, nilai (0-100) }`
 
 ---
 
-### 5. Delete Nilai Mahasiswa
+## Admin — Pengguna
 
-**DELETE** `/api/dosen/nilai?mahasiswaId={id}&komponenId={id}`
+### GET `/api/admin/pengguna/dosen`
+Semua dosen.
 
-Menghapus nilai mahasiswa.
+### POST `/api/admin/pengguna/dosen`
+Tambah dosen. **Body:** `{ name, email, nidn }`
 
-#### Request
-```http
-DELETE /api/dosen/nilai?mahasiswaId=mhs_1&komponenId=komp_1 HTTP/1.1
-```
+### PUT `/api/admin/pengguna/dosen`
+Update dosen. **Body:** `{ dosenId, name?, email?, nidn? }`
 
-#### Response Success (200)
-```json
-{
-  "success": true
-}
-```
+### DELETE `/api/admin/pengguna/dosen?dosenId=`
+Hapus dosen (cascade: pengampu).
 
----
+### GET `/api/admin/pengguna/mahasiswa?angkatan=`
+Semua mahasiswa, bisa filter per angkatan.
 
-### 6. Get Komponen Nilai by Kelas
+### POST `/api/admin/pengguna/mahasiswa`
+Tambah mahasiswa (atomic transaction). **Body:** `{ name, email, nim, angkatan }`
 
-**GET** `/api/dosen/komponen-nilai?kelasId={id}`
+### PUT `/api/admin/pengguna/mahasiswa`
+Update mahasiswa. **Body:** `{ mahasiswaId, name?, email?, nim?, angkatan?, status? }`
 
-Mendapatkan daftar komponen nilai untuk kelas tertentu.
-
-#### Request
-```http
-GET /api/dosen/komponen-nilai?kelasId=cls_123 HTTP/1.1
-```
-
-#### Response Success (200)
-```json
-[
-  {
-    "id": "komp_1",
-    "nama": "UTS",
-    "bobot": 30,
-    "kelasId": "cls_123"
-  },
-  {
-    "id": "komp_2",
-    "nama": "UAS",
-    "bobot": 40,
-    "kelasId": "cls_123"
-  }
-]
-```
+### DELETE `/api/admin/pengguna/mahasiswa?mahasiswaId=`
+Hapus mahasiswa (cascade: nilai & KRS).
 
 ---
 
-### 7. Create Komponen Nilai
+## Admin — Options (Dropdown)
 
-**POST** `/api/dosen/komponen-nilai`
+### GET `/api/admin/options?type=mk`
+Semua mata kuliah.
 
-Membuat komponen nilai baru.
+### GET `/api/admin/options?type=dosen`
+Semua dosen.
 
-#### Request
-```http
-POST /api/dosen/komponen-nilai HTTP/1.1
-Content-Type: application/json
+### GET `/api/admin/options?type=mahasiswa`
+Semua mahasiswa.
 
-{
-  "kelasId": "cls_123",
-  "nama": "UTS",
-  "bobot": 30
-}
-```
-
-#### Response Success (200)
-```json
-{
-  "id": "komp_1",
-  "nama": "UTS",
-  "bobot": 30,
-  "kelasId": "cls_123"
-}
-```
+### GET `/api/admin/options?type=mahasiswa-not-in-kelas&kelasId=`
+Mahasiswa yang belum terdaftar di kelas tertentu.
 
 ---
 
-### 8. Update Komponen Nilai
+## Admin — Import CSV
 
-**PUT** `/api/dosen/komponen-nilai`
+Semua endpoint import menggunakan `FormData` (bukan JSON).
 
-Mengupdate komponen nilai.
+### POST `/api/admin/import/dosen`
+Import dosen baru.  
+**Form:** `file`  
+**CSV format:** `name, email, nidn`
 
-#### Request
-```http
-PUT /api/dosen/komponen-nilai HTTP/1.1
-Content-Type: application/json
+### POST `/api/admin/import/mahasiswa`
+Import mahasiswa baru (validasi domain `@student.uns.ac.id`).  
+**Form:** `file`  
+**CSV format:** `name, email, nim, angkatan`
 
-{
-  "id": "komp_1",
-  "nama": "UTS",
-  "bobot": 35
-}
-```
+### POST `/api/admin/import/nilai`
+Import nilai untuk satu kelas.  
+**Form:** `file`, `kelasId`  
+**CSV format:** `nim, <nama_komponen1>, <nama_komponen2>, ...`  
+Nama komponen harus sama persis dengan yang sudah dibuat di kelas.
 
-#### Response Success (200)
-```json
-{
-  "id": "komp_1",
-  "nama": "UTS",
-  "bobot": 35,
-  "kelasId": "cls_123"
-}
-```
+### POST `/api/admin/import/kelas`
+Import banyak kelas sekaligus + assign dosen pengampu.  
+**Form:** `file`  
+**CSV format:** `kode_mk, nama_kelas, tahun_ajaran, semester, nidn_dosen`  
+- `nidn_dosen` boleh kosong; multi-dosen pisah dengan `|`
+- Kelas yang sudah ada tidak dibuat ulang, tapi dosen baru tetap ditambahkan
 
----
+### POST `/api/admin/import/kelas-mahasiswa`
+Enroll mahasiswa ke kelas via CSV (mahasiswa harus sudah ada di sistem).  
+**Form:** `file`, `kelasId`  
+**CSV format:** `nim`
 
-### 9. Delete Komponen Nilai
-
-**DELETE** `/api/dosen/komponen-nilai?id={id}`
-
-Menghapus komponen nilai.
-
-#### Request
-```http
-DELETE /api/dosen/komponen-nilai?id=komp_1 HTTP/1.1
-```
-
-#### Response Success (200)
-```json
-{
-  "success": true
-}
-```
+### POST `/api/admin/import/mata-kuliah?mode=skip|update`
+Import daftar mata kuliah.  
+**Form:** `file`  
+**CSV format:** `kode, nama, sks, semester`  
+**Query param:** `mode=skip` (default, kode lama dilewati) atau `mode=update` (kode lama diperbarui)
 
 ---
 
-### 10. Get Rekap Nilai by Kelas
+## Dosen — Import CSV
 
-**GET** `/api/dosen/rekap/[kelasId]`
-
-Mendapatkan rekap nilai mahasiswa untuk kelas tertentu.
-
-#### Request
-```http
-GET /api/dosen/rekap/cls_123 HTTP/1.1
-```
-
-#### Response Success (200)
-```json
-{
-  "kelas": {
-    "id": "cls_123",
-    "nama": "A",
-    "mataKuliah": "Sistem Basis Data",
-    "kode": "TI2023",
-    "tahunAjaran": "2026/2027",
-    "semester": "Ganjil"
-  },
-  "komponenNilai": [
-    {
-      "id": "komp_1",
-      "nama": "UTS",
-      "bobot": 30
-    },
-    {
-      "id": "komp_2",
-      "nama": "UAS",
-      "bobot": 40
-    },
-    {
-      "id": "komp_3",
-      "nama": "Tugas",
-      "bobot": 30
-    }
-  ],
-  "rekap": [
-    {
-      "mahasiswaId": "mhs_1",
-      "nim": "I0323001",
-      "nama": "Aditya Pratama",
-      "angkatan": "2023",
-      "nilaiKomponen": [
-        {
-          "komponenId": "komp_1",
-          "komponenNama": "UTS",
-          "nilai": 75
-        },
-        {
-          "komponenId": "komp_2",
-          "komponenNama": "UAS",
-          "nilai": 80
-        },
-        {
-          "komponenId": "komp_3",
-          "komponenNama": "Tugas",
-          "nilai": 85
-        }
-      ],
-      "nilaiAkhir": 80.5,
-      "nilaiHuruf": "A-"
-    }
-  ]
-}
-```
+### POST `/api/dosen/import/nilai`
+Import nilai untuk kelas yang diampu dosen.  
+**Form:** `file`, `kelasId`  
+**CSV format:** sama dengan `/api/admin/import/nilai`
 
 ---
 
-## 📊 Konversi Nilai Huruf
+## Kaprodi
 
-Rumus yang digunakan di endpoint rekap:
+### GET `/api/kaprodi/laporan-cpl?angkatan=`
+Laporan ketercapaian CPL. Filter: `all | 2022 | 2023 | 2024 | 2025`
 
-```javascript
-function getNilaiHuruf(nilai: number): string {
-  if (nilai >= 85) return 'A';
-  if (nilai >= 80) return 'A-';
-  if (nilai >= 75) return 'B+';
-  if (nilai >= 70) return 'B';
-  if (nilai >= 65) return 'B-';
-  if (nilai >= 60) return 'C+';
-  if (nilai >= 55) return 'C';
-  if (nilai >= 50) return 'C-';
-  if (nilai >= 45) return 'D';
-  return 'E';
-}
-```
+### GET `/api/kaprodi/laporan-cpl/export?format=csv&angkatan=`
+Download laporan CPL sebagai file CSV (Excel-compatible, BOM UTF-8).
 
----
+### GET `/api/kaprodi/kurikulum?type=cpl|pi|cpmk`
+Data kurikulum sesuai tipe.
 
-## 🧮 Perhitungan Nilai Akhir
+### POST `/api/kaprodi/kurikulum/cpl`
+Tambah CPL. **Body:** `{ kode, deskripsi }`
 
-Nilai akhir dihitung dengan **weighted average**:
+### PUT `/api/kaprodi/kurikulum/cpl`
+Update CPL.
 
-```
-Nilai Akhir = Σ (Nilai Komponen × Bobot Komponen / 100)
-```
+### DELETE `/api/kaprodi/kurikulum/cpl?id=`
+Hapus CPL.
 
-**Contoh:**
-- UTS: 75 (bobot 30%)
-- UAS: 80 (bobot 40%)
-- Tugas: 85 (bobot 30%)
+### POST `/api/kaprodi/kurikulum/pi`
+Tambah PI. **Body:** `{ kode, deskripsi, cplId }`
 
-```
-Nilai Akhir = (75 × 0.3) + (80 × 0.4) + (85 × 0.3)
-            = 22.5 + 32 + 25.5
-            = 80
-```
+### PUT `/api/kaprodi/kurikulum/pi` / DELETE `?id=`
+Update / hapus PI.
 
----
+### POST `/api/kaprodi/kurikulum/cpmk`
+Tambah CPMK. **Body:** `{ kode, deskripsi, piId, mkId }`
 
-## 🔒 Error Codes
+### PUT `/api/kaprodi/kurikulum/cpmk` / DELETE `?id=`
+Update / hapus CPMK.
 
-| Code | Message                  | Deskripsi                          |
-|------|--------------------------|-------------------------------------|
-| 400  | Missing required fields  | Parameter request tidak lengkap     |
-| 400  | Missing parameters       | Query parameter tidak ada           |
-| 401  | Unauthorized             | Cookie userId tidak ada             |
-| 404  | Not found                | Resource tidak ditemukan            |
-| 500  | Internal server error    | Error server                        |
+### GET `/api/kaprodi/kurikulum/options?type=cpl|pi|mk`
+Dropdown data untuk form kurikulum.
 
----
+### GET `/api/kaprodi/admin`
+Daftar admin prodi.
 
-## 🧪 Testing dengan cURL
+### POST `/api/kaprodi/admin`
+Tambah admin. **Body:** `{ name, email, nidn, password }`
 
-### Get Mata Kuliah
-```bash
-curl -X GET http://localhost:3000/api/dosen/mata-kuliah \
-  -H "Cookie: userId=dosen-001; role=DOSEN"
-```
+### PUT `/api/kaprodi/admin/[id]`
+Update admin.
 
-### Create Komponen Nilai
-```bash
-curl -X POST http://localhost:3000/api/dosen/komponen-nilai \
-  -H "Content-Type: application/json" \
-  -d '{
-    "kelasId": "cls_123",
-    "nama": "UTS",
-    "bobot": 30
-  }'
-```
-
-### Input Nilai
-```bash
-curl -X POST http://localhost:3000/api/dosen/nilai \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mahasiswaId": "mhs_1",
-    "komponenId": "komp_1",
-    "nilai": 85
-  }'
-```
-
-### Get Rekap
-```bash
-curl -X GET http://localhost:3000/api/dosen/rekap/cls_123
-```
-
----
-
-## 🔄 Flow Diagram
-
-```
-┌─────────────┐
-│   Login     │
-│   Dosen     │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│ GET /api/dosen/mata-kuliah          │
-│ → List mata kuliah yang diampu      │
-└──────┬──────────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│ GET /api/dosen/mahasiswa/[kelasId]  │
-│ → List mahasiswa di kelas           │
-└──────┬──────────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│ POST /api/dosen/komponen-nilai      │
-│ → Buat komponen (UTS, UAS, Tugas)   │
-└──────┬──────────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│ POST /api/dosen/nilai               │
-│ → Input nilai mahasiswa             │
-└──────┬──────────────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│ GET /api/dosen/rekap/[kelasId]      │
-│ → Lihat rekap & statistik           │
-└─────────────────────────────────────┘
-```
-
----
-
-## 📝 Notes
-
-1. **Cookie Authentication**: Semua request harus include cookie `userId` dan `role`
-2. **Bobot Validation**: Frontend melakukan validasi total bobot = 100%
-3. **Nilai Range**: Nilai harus 0-100
-4. **Cascade Delete**: Menghapus komponen nilai akan menghapus semua nilai mahasiswa terkait
-5. **Auto-calculate**: Nilai akhir dihitung otomatis di backend
-
----
-
-## 🚀 Postman Collection
-
-Import collection ini ke Postman untuk testing:
-
-```json
-{
-  "info": {
-    "name": "SICAL-TI Dosen API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Get Mata Kuliah",
-      "request": {
-        "method": "GET",
-        "url": "http://localhost:3000/api/dosen/mata-kuliah"
-      }
-    },
-    {
-      "name": "Create Komponen Nilai",
-      "request": {
-        "method": "POST",
-        "url": "http://localhost:3000/api/dosen/komponen-nilai",
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"kelasId\": \"cls_123\",\n  \"nama\": \"UTS\",\n  \"bobot\": 30\n}"
-        }
-      }
-    }
-  ]
-}
-```
-
----
-
-**Happy Coding! 🎉**
+### DELETE `/api/kaprodi/admin/[id]`
+Hapus admin.

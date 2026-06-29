@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
+import { isDosenAuthorizedForKelas } from '@/lib/auth-utils';
 
 export async function GET(
   request: Request,
@@ -7,6 +9,19 @@ export async function GET(
 ) {
   try {
     const { kelasId } = await params;
+
+    // AUTHORIZATION: Verify dosen can access this kelas
+    const cookieStore = await cookies();
+    const userIdCookie = cookieStore.get('userId');
+
+    if (!userIdCookie?.value) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const isAuthorized = await isDosenAuthorizedForKelas(userIdCookie.value, kelasId);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: 'Unauthorized: Anda tidak memiliki akses ke kelas ini' }, { status: 403 });
+    }
 
     const kelas = await prisma.kelas.findUnique({
       where: { id: kelasId },

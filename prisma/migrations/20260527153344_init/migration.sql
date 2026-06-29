@@ -23,7 +23,6 @@ CREATE TABLE "Mahasiswa" (
 CREATE TABLE "Dosen" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "nidn" TEXT NOT NULL,
-    "nip" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     CONSTRAINT "Dosen_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -132,9 +131,6 @@ CREATE UNIQUE INDEX "Mahasiswa_userId_key" ON "Mahasiswa"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Dosen_nidn_key" ON "Dosen"("nidn");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Dosen_nip_key" ON "Dosen"("nip");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Dosen_userId_key" ON "Dosen"("userId");

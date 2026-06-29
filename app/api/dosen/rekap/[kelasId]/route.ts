@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
+import { isDosenAuthorizedForKelas } from '@/lib/auth-utils';
 
 export async function GET(
   request: Request,
@@ -7,6 +9,19 @@ export async function GET(
 ) {
   try {
     const { kelasId } = await params;
+
+    // AUTHORIZATION: Verify dosen can access this kelas
+    const cookieStore = await cookies();
+    const userIdCookie = cookieStore.get('userId');
+
+    if (!userIdCookie?.value) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const isAuthorized = await isDosenAuthorizedForKelas(userIdCookie.value, kelasId);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: 'Unauthorized: Anda tidak memiliki akses ke kelas ini' }, { status: 403 });
+    }
 
     const kelas = await prisma.kelas.findUnique({
       where: { id: kelasId },
@@ -18,11 +33,8 @@ export async function GET(
               include: {
                 user: true,
                 nilaiMahasiswa: {
-                  include: {
-                    komponen: {
-                      where: { kelasId },
-                    },
-                  },
+                  where: { komponen: { kelasId } },
+                  include: { komponen: true },
                 },
               },
             },
@@ -36,14 +48,11 @@ export async function GET(
       return NextResponse.json({ error: 'Kelas not found' }, { status: 404 });
     }
 
-    // Calculate rekap for each mahasiswa
+    // Rekap setiap mahasiswa
     const rekap = kelas.krs.map((krs) => {
       const mhs = krs.mahasiswa;
-      const nilaiList = mhs.nilaiMahasiswa.filter(
-        (n) => n.komponen.kelasId === kelasId
-      );
+      const nilaiList = mhs.nilaiMahasiswa; // sudah terfilter by kelasId dari query
 
-      // Calculate weighted average
       let totalNilai = 0;
       let totalBobot = 0;
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { BookOpen, Users, Calendar, GraduationCap } from "lucide-react";
+import { useScrollRestore } from "@/lib/useScrollRestore";
 
 interface MataKuliah {
   kelasId: string;
@@ -20,12 +21,14 @@ interface MataKuliah {
 export default function MataKuliahAmpuPage() {
   const [mataKuliah, setMataKuliah] = useState<MataKuliah[]>([]);
   const [loading, setLoading] = useState(true);
+  const { saveScroll, restoreScroll } = useScrollRestore();
 
   useEffect(() => {
     fetchMataKuliah();
   }, []);
 
   const fetchMataKuliah = async () => {
+    saveScroll();
     try {
       const res = await fetch('/api/dosen/mata-kuliah');
       const data = await res.json();
@@ -35,6 +38,7 @@ export default function MataKuliahAmpuPage() {
       setMataKuliah([]);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
   };
 

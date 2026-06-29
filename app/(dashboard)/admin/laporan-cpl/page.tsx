@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import RadarChartCPL from "@/components/charts/RadarChart";
 import { Download, Target, TrendingUp, TrendingDown, Users } from "lucide-react";
+import { useScrollRestore } from "@/lib/useScrollRestore";
 
 interface LaporanItem {
   cplKode: string;
@@ -19,15 +20,17 @@ export default function AdminLaporanCPLPage() {
   const [laporan, setLaporan] = useState<LaporanItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [angkatan, setAngkatan] = useState("all");
+  const { saveScroll, restoreScroll } = useScrollRestore();
 
   useEffect(() => {
     loadLaporan();
   }, [angkatan]);
 
   const loadLaporan = async () => {
+    saveScroll();
     setLoading(true);
     try {
-      const res = await fetch(`/api/kaprodi/laporan-cpl?angkatan=${angkatan}`);
+      const res = await fetch(`/api/admin/laporan-cpl?angkatan=${angkatan}`);
       const data = await res.json();
       setLaporan(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -35,6 +38,7 @@ export default function AdminLaporanCPLPage() {
       setLaporan([]);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
   };
 

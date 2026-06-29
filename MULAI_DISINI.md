@@ -1,21 +1,13 @@
-# 🚀 MULAI DI SINI - Quick Start Guide
+# 🚀 MULAI DI SINI — SICAL-TI UNS
 
-## 📦 Install & Setup (5 Menit)
+> Sistem Informasi Capaian Pembelajaran Lulusan — Program Studi Teknik Industri UNS
 
-### 1. Install Dependencies
-```bash
-npm install
-```
+---
 
-### 2. Setup Database
-```bash
-npx prisma generate
-npx prisma migrate dev
-npm run db:seed
-```
+## ⚡ Cara Menjalankan Website
 
-### 3. Jalankan Aplikasi
-```bash
+```powershell
+cd "D:\Kuliah\Sem 6\Analisis dan Perancangan Sistem Informasi\Tubes\apsi2026\apsi2026"
 npm run dev
 ```
 
@@ -23,182 +15,145 @@ Buka browser: **http://localhost:3000**
 
 ---
 
-## 🔑 Login Pertama Kali
+## 🔑 Akun Login (password semua: `password123`)
 
-### Kaprodi (Kepala Program Studi)
-```
-Email: kaprodi@staff.uns.ac.id
-Password: password123
-```
-**Bisa apa:**
-- Kelola CPL, PI, CPMK
-- Lihat laporan capaian CPL
-- **Tambah/Edit/Hapus Admin Prodi** ⭐
+| Role | Email | Akses |
+|------|-------|-------|
+| **Kaprodi** | `wakhidjauhari@kaprodi.uns.ac.id` | Full — termasuk manajemen admin |
+| **Penjaminan Mutu** | `ratna@jamu.uns.ac.id` | Sama dengan Kaprodi |
+| **Admin** | `budi@admin.uns.ac.id` | Manajemen kelas, pengguna, nilai |
+| **Dosen** | `joko.widodo@staff.uns.ac.id` | Input nilai mata kuliah yang diampu |
+| **Mahasiswa** | `aditya@student.uns.ac.id` | Lihat CPL & riwayat nilai sendiri |
 
----
+### Domain Email per Role
 
-### Admin Prodi
-```
-Email: admin@staff.uns.ac.id
-Password: password123
-```
-**Bisa apa:**
-- Kelola CPL, PI, CPMK
-- Lihat laporan capaian CPL
+| Role | Domain |
+|------|--------|
+| Kaprodi | `@kaprodi.uns.ac.id` |
+| Penjaminan Mutu | `@jamu.uns.ac.id` |
+| Admin Prodi | `@admin.uns.ac.id` |
+| Dosen | `@staff.uns.ac.id` |
+| Mahasiswa | `@student.uns.ac.id` |
 
 ---
 
-### Dosen
-```
-Email: dosen@staff.uns.ac.id
-Password: password123
-```
-**Bisa apa:**
-- Lihat mata kuliah yang diampu
-- Input nilai mahasiswa
-- Lihat rekap nilai per kelas
-- Export data ke CSV
+## 🗄️ Setup Database (pertama kali)
 
-**Sudah punya data:**
-- 4 mata kuliah diampu
-- 26 mahasiswa enrolled
-- 1 kelas sudah ada nilai lengkap (Sistem Basis Data)
+```powershell
+# 1. Install dependencies
+npm install
 
----
+# 2. Reset & setup database
+npx prisma migrate reset --force
 
-### Mahasiswa
-```
-Email: aditya@student.uns.ac.id
-Password: password123
-```
-**Bisa apa:**
-- Lihat profil & data akademik
-- Lihat hasil capaian CPL (Radar Chart)
-- Lihat riwayat nilai per semester
-
----
-
-## ✅ Cek Fitur Utama (3 Menit)
-
-### 1. Menu Mahasiswa (Profil, CPL, Riwayat)
-1. Login sebagai mahasiswa
-2. Klik/buka:
-   - `/mahasiswa/profil` - Data pribadi & akademik
-   - `/mahasiswa/cpl` - Hasil CPL dengan visualisasi
-   - `/mahasiswa/riwayat` - Riwayat nilai per semester
-
-### 2. Manajemen Admin oleh Kaprodi
-1. Login sebagai Kaprodi
-2. Navigasi ke: **Manajemen Admin**
-3. Klik: **Tambah Admin**
-4. Isi form (Nama, Email, NIDN, NIP, Password)
-5. Klik: **Tambah**
-6. Admin baru langsung bisa login!
-
-### 3. Detail & Rekap Mahasiswa (Dosen)
-1. Login sebagai dosen
-2. Di dashboard, cari: **TI2023 - Sistem Basis Data**
-3. Status: "Siap Input Nilai" (hijau)
-4. Klik: **Lihat Detail**
-5. Muncul:
-   - Statistik kelas
-   - Tabel rekap nilai lengkap
-   - Tombol Export CSV
-
----
-
-## 📊 Data yang Tersedia
-
-| Item | Jumlah | Keterangan |
-|------|--------|-----------|
-| **Akun** | 14 | 1 Kaprodi, 2 Admin, 2 Dosen, 10 Mahasiswa |
-| **Mata Kuliah** | 4 | Sistem Basis Data, Algoritma, AI, Manajemen |
-| **Kelas** | 4 | Semua diampu oleh dosen@staff.uns.ac.id |
-| **Mahasiswa** | 10 | Angkatan 2023, NIM I0323001-010 |
-| **CPL** | 12 | Sesuai standar IABEE |
-| **Nilai** | ✅ | Kelas Sistem Basis Data (8 mhs) |
-
----
-
-## 🎯 Flow Lengkap
-
-### Kaprodi → Tambah Admin Baru
-```
-Login Kaprodi
-  → Manajemen Admin
-    → Tambah Admin
-      → Isi: Nama, Email, NIDN, NIP, Password
-        → Simpan
-          → Admin baru muncul di tabel
-            → Admin bisa login dengan email & password baru
-```
-
-### Dosen → Input Nilai → Lihat Rekap
-```
-Login Dosen
-  → Mata Kuliah
-    → Pilih kelas
-      → Kelola Nilai
-        → Tambah komponen (UTS, UAS, Tugas)
-          → Set bobot (total = 100%)
-            → Input nilai per mahasiswa
-              → Lihat Rekap
-                → Tabel lengkap + statistik
-                  → Export CSV
-```
-
-### Mahasiswa → Cek Nilai & CPL
-```
-Login Mahasiswa
-  → Dashboard (overview CPL)
-    → Profil (data pribadi)
-      → Hasil CPL (detail + visualisasi)
-        → Riwayat Nilai (per semester)
+# 3. Jalankan server
+npm run dev
 ```
 
 ---
 
-## ❓ FAQ Cepat
+## 📋 Fitur per Role
 
-### Q: Menu mahasiswa tidak ada?
-**A:** Menu sudah ada! Cek URL langsung:
-- `/mahasiswa/profil`
-- `/mahasiswa/cpl`
-- `/mahasiswa/riwayat`
+### 🟣 Kaprodi & Penjaminan Mutu (hak akses sama)
+- **Dashboard** — statistik CPL real dari database
+- **Data Kurikulum** — CRUD CPL, PI, CPMK
+- **Laporan CPL** — download Excel/CSV dan Print/PDF, filter per angkatan
+- **Manajemen Admin** — tambah/edit/hapus akun admin (Kaprodi saja)
 
-### Q: Rekap mahasiswa kosong?
-**A:** Pilih kelas **Sistem Basis Data** (TI2023). Kelas ini sudah ada nilai lengkap.
+### 🔵 Admin Prodi
+- **Manajemen Pengguna** — tambah/edit/hapus dosen & mahasiswa, import CSV massal
+- **Manajemen Kelas** — buat kelas manual atau **import CSV** (sekaligus assign dosen), **import mahasiswa ke kelas via CSV**, enroll/unenroll satu per satu
+- **Mata Kuliah** — tambah/edit/hapus, **import CSV** (mode skip atau update), template 24 MK TI UNS tersedia
+- **Input Nilai** — bantu input nilai mahasiswa per kelas, **import CSV nilai**
+- **Data Kurikulum** — CRUD CPL, PI, CPMK
+- **Laporan CPL** — download laporan
 
-### Q: Kaprodi kok dummy?
-**A:** Bukan dummy! Itu akun default dari seed. Untuk production, ganti password via script atau database.
+### 🟡 Dosen
+- **Dashboard** — statistik mata kuliah yang diampu
+- **Sidebar dinamis** — menu per mata kuliah berdasarkan pengampuan
+- **Komponen penilaian fleksibel** — tiap kelas bisa beda komponen (UTS/UAS/Tugas/Kuis/dll)
+- **Input Nilai** — kelola komponen penilaian & input nilai, **import CSV nilai**, batch save satu klik
+- **Rekap Nilai** — lihat rekap nilai akhir + huruf mutu, export CSV
 
-### Q: Mau reset data?
-**A:** 
-```bash
-rm prisma/dev.db
-npx prisma migrate dev
-npm run db:seed
+### � Mahasiswa
+- **Dashboard** — profil & ringkasan CPL personal
+- **Hasil CPL** — progress bar, status tercapai/belum, download PDF
+- **Riwayat Nilai** — nilai per semester, IPS & IPK otomatis
+- **Profil** — data diri dari database
+
+---
+
+## 📁 Struktur Penting
+
+```
+prisma/
+  seed.ts          ← Edit data dosen & mahasiswa di sini
+  schema.prisma    ← Struktur database
+  dev.db           ← File database SQLite
+
+app/
+  (auth)/login/    ← Halaman login (1 pintu)
+  (dashboard)/
+    admin/         ← Semua halaman admin
+    kaprodi/       ← Semua halaman kaprodi
+    jamu/          ← Semua halaman penjaminan mutu
+    dosen/         ← Semua halaman dosen
+    mahasiswa/     ← Semua halaman mahasiswa
+  api/             ← Semua API endpoints
+
+components/
+  dashboard/       ← Shared components (KurikulumContent, LaporanCPLContent)
+  layout/          ← DashboardShell, Sidebar, Navbar
+  ui/              ← Card, CSVUploader, dll
 ```
 
 ---
 
-## 🎉 Selesai!
+## ✏️ Cara Edit Data Awal (Dosen & Mahasiswa)
 
-Semua fitur sudah berfungsi:
-- ✅ Menu mahasiswa lengkap (Profil, CPL, Riwayat)
-- ✅ Kaprodi bisa kelola admin (bukan dummy)
-- ✅ Detail & rekap mahasiswa di dosen
+Buka file `prisma/seed.ts` dan edit bagian yang diberi komentar:
 
-**Tidak ada bug.** Semua sudah ditest dan bekerja dengan baik.
+```typescript
+// ✏️  EDIT DATA DOSEN DI SINI
+const dosenData = [
+  {
+    name: 'Nama Dosen',
+    email: 'nama@staff.uns.ac.id',
+    nidn: '0612108901',
+  },
+  // tambah lebih banyak...
+];
 
-Jika ada pertanyaan atau butuh fitur tambahan, tinggal bilang! 🚀
+// ✏️  EDIT DATA MAHASISWA DI SINI
+const mahasiswaData = [
+  { nim: 'I0323001', name: 'Nama Mahasiswa', email: 'nama@student.uns.ac.id', angkatan: '2023' },
+  // tambah lebih banyak...
+];
+```
+
+Setelah edit, jalankan: `npm run db:seed`
+
+> ⚠️ `db:seed` menghapus semua data dan isi ulang dari awal.
 
 ---
 
-## 📚 Dokumentasi Lengkap
+## 🛠️ Perintah Berguna
 
-- **PANDUAN_LENGKAP.md** - Dokumentasi detail semua fitur
-- **STATUS_IMPLEMENTASI.md** - Status fitur & checklist
-- **FAQ_TROUBLESHOOTING.md** - Solusi masalah umum
+```powershell
+npm run dev          # Jalankan server development
+npm run db:seed      # Reset & isi ulang data dummy
+npx prisma studio    # Buka GUI database di browser (localhost:5555)
+npx prisma migrate reset --force  # Reset total database
+```
 
-Selamat mencoba! 🎓✨
+---
+
+## 🐛 Troubleshooting
+
+| Masalah | Solusi |
+|---------|--------|
+| `npm not recognized` | Install Node.js dari https://nodejs.org |
+| `database is locked` | Tutup Prisma Studio & server dev dulu, lalu coba lagi |
+| Login gagal | Pastikan email sesuai domain, password `password123` |
+| Halaman 404 | Pastikan server jalan di port 3000 |
+| Error "nip constraint" | Jalankan `npx prisma migrate reset --force` |

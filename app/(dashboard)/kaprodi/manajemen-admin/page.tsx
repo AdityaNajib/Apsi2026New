@@ -1,128 +1,114 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Users, Plus, Edit2, Trash2, Mail, Phone, Calendar } from "lucide-react";
+import { Users, Plus, Edit2, Trash2, X, Search, Shield } from "lucide-react";
+import { useScrollRestore } from "@/lib/useScrollRestore";
 
-interface Admin {
+interface AdminItem {
   id: string;
   name: string;
   email: string;
-  nidn: string;
-  nip: string;
   createdAt: string;
 }
 
 export default function ManajemenAdminPage() {
-  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [adminList, setAdminList] = useState<AdminItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
   const [showModal, setShowModal] = useState(false);
-  const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    nidn: "",
-    nip: "",
-    password: "",
-  });
+  const [editing, setEditing] = useState<AdminItem | null>(null);
+  const [form, setForm] = useState({ name: "", email: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchAdmins();
-  }, []);
+  const { saveScroll, restoreScroll } = useScrollRestore();
 
-  const fetchAdmins = async () => {
+  const fetchAdmins = useCallback(async () => {
+    saveScroll();
+    setLoading(true);
     try {
       const res = await fetch("/api/kaprodi/admin");
-      const data = await res.json();
-      setAdmins(data);
-    } catch (error) {
-      console.error("Error fetching admins:", error);
+      setAdminList(await res.json());
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
+      restoreScroll();
     }
+  }, [saveScroll, restoreScroll]);
+
+  useEffect(() => { fetchAdmins(); }, [fetchAdmins]);
+
+  const openAdd = () => {
+    setEditing(null);
+    setForm({ name: "", email: "" });
+    setError("");
+    setShowModal(true);
+  };
+
+  const openEdit = (admin: AdminItem) => {
+    setEditing(admin);
+    setForm({ name: admin.name, email: admin.email });
+    setError("");
+    setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
+    setError("");
     try {
-      const url = editingAdmin ? `/api/kaprodi/admin/${editingAdmin.id}` : "/api/kaprodi/admin";
-      const method = editingAdmin ? "PUT" : "POST";
-      
-      const res = await fetch(url, {
+      const method = editing ? "PUT" : "POST";
+      const body = editing
+        ? { userId: editing.id, ...form }
+        : form;
+      const res = await fetch("/api/kaprodi/admin", {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(body),
       });
-
-      if (res.ok) {
-        fetchAdmins();
-        setShowModal(false);
-        resetForm();
-      }
-    } catch (error) {
-      console.error("Error saving admin:", error);
+      const data = await res.json();
+      if (!res.ok) { setError(data.error); return; }
+      setShowModal(false);
+      fetchAdmins();
+    } catch {
+      setError("Terjadi kesalahan");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus admin ini?")) return;
-    
-    try {
-      const res = await fetch(`/api/kaprodi/admin/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        fetchAdmins();
-      }
-    } catch (error) {
-      console.error("Error deleting admin:", error);
+  const handleDelete = async (admin: AdminItem) => {
+    if (!confirm(`Hapus admin "${admin.name}"?\nAkun ini tidak bisa digunakan lagi setelah dihapus.`)) return;
+    const res = await fetch(`/api/kaprodi/admin?userId=${admin.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.error || "Gagal menghapus admin");
+      return;
     }
+    fetchAdmins();
   };
 
-  const handleEdit = (admin: Admin) => {
-    setEditingAdmin(admin);
-    setFormData({
-      name: admin.name,
-      email: admin.email,
-      nidn: admin.nidn,
-      nip: admin.nip,
-      password: "",
-    });
-    setShowModal(true);
-  };
-
-  const resetForm = () => {
-    setFormData({ name: "", email: "", nidn: "", nip: "", password: "" });
-    setEditingAdmin(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  const filtered = adminList.filter((a) =>
+    a.name.toLowerCase().includes(search.toLowerCase()) ||
+    a.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>
-            Manajemen Admin
-          </h2>
+          <h2 className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>Manajemen Admin Prodi</h2>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Kelola admin program studi Teknik Industri
+            Tambah, edit, atau hapus akun Admin Prodi
           </p>
         </div>
         <button
-          onClick={() => {
-            resetForm();
-            setShowModal(true);
-          }}
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
+          onClick={openAdd}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white"
           style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)", boxShadow: "0 4px 14px rgba(67,97,238,0.3)" }}
         >
           <Plus className="w-4 h-4" />
@@ -133,173 +119,205 @@ export default function ManajemenAdminPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <Card>
-          <CardContent className="p-0">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "#ede9fe" }}>
-                <Users className="w-6 h-6" style={{ color: "#7c3aed" }} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>{admins.length}</p>
-                <p className="text-sm" style={{ color: "#94a3b8" }}>Total Admin</p>
-              </div>
+          <CardContent className="p-0 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "#dbeafe" }}>
+              <Shield className="w-5 h-5" style={{ color: "#2563eb" }} />
+            </div>
+            <div>
+              <p className="text-xs font-medium" style={{ color: "#94a3b8" }}>Total Admin</p>
+              <p className="text-2xl font-bold" style={{ color: "#1a1d2e" }}>{adminList.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-0 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "#d1fae5" }}>
+              <Users className="w-5 h-5" style={{ color: "#059669" }} />
+            </div>
+            <div>
+              <p className="text-xs font-medium" style={{ color: "#94a3b8" }}>Domain Email</p>
+              <p className="text-sm font-bold" style={{ color: "#1a1d2e" }}>@admin.uns.ac.id</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-0 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "#fef3c7" }}>
+              <Shield className="w-5 h-5" style={{ color: "#d97706" }} />
+            </div>
+            <div>
+              <p className="text-xs font-medium" style={{ color: "#94a3b8" }}>Password Default</p>
+              <p className="text-sm font-bold font-mono" style={{ color: "#1a1d2e" }}>password123</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Admin Table */}
+      {/* Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Daftar Admin Program Studi</CardTitle>
+          <CardTitle>Daftar Admin Prodi</CardTitle>
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#94a3b8" }} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari nama atau email..."
+              className="pl-9 pr-4 py-2 rounded-xl text-sm focus:outline-none"
+              style={{ background: "#f1f5f9", border: "1.5px solid #e2e8f0", color: "#1a1d2e", width: 260 }}
+            />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
-                  <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>Admin</th>
-                  <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>NIDN / NIP</th>
-                  <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>Email</th>
-                  <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>Terdaftar</th>
-                  <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#94a3b8" }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {admins.map((admin) => (
-                  <tr key={admin.id} style={{ borderBottom: "1px solid #f8faff" }}>
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)" }}>
-                          {admin.name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-semibold" style={{ color: "#1a1d2e" }}>{admin.name}</p>
-                          <p className="text-xs" style={{ color: "#94a3b8" }}>Admin Prodi</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <p className="text-sm font-medium" style={{ color: "#1a1d2e" }}>{admin.nidn}</p>
-                      <p className="text-xs" style={{ color: "#94a3b8" }}>{admin.nip}</p>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" style={{ color: "#94a3b8" }} />
-                        <span className="text-sm" style={{ color: "#64748b" }}>{admin.email}</span>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" style={{ color: "#94a3b8" }} />
-                        <span className="text-sm" style={{ color: "#64748b" }}>
-                          {new Date(admin.createdAt).toLocaleDateString("id-ID")}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEdit(admin)}
-                          className="p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 className="w-4 h-4" style={{ color: "#4361ee" }} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(admin.id)}
-                          className="p-2 rounded-lg hover:bg-red-50 transition-colors"
-                          title="Hapus"
-                        >
-                          <Trash2 className="w-4 h-4" style={{ color: "#dc2626" }} />
-                        </button>
-                      </div>
-                    </td>
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+                style={{ borderColor: "#4361ee", borderTopColor: "transparent" }} />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-12">
+              <Shield className="w-10 h-10 mx-auto mb-3" style={{ color: "#cbd5e1" }} />
+              <p className="font-semibold" style={{ color: "#64748b" }}>
+                {adminList.length === 0 ? "Belum ada admin" : "Tidak ada hasil pencarian"}
+              </p>
+              <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
+                {adminList.length === 0 && "Klik \"Tambah Admin\" untuk menambahkan"}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #f1f5f9" }}>
+                    {["Nama Admin", "Email Login", "Dibuat", "Aksi"].map((h) => (
+                      <th key={h} className="pb-3 text-left text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: "#94a3b8" }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filtered.map((admin) => (
+                    <tr key={admin.id} style={{ borderBottom: "1px solid #f8faff" }}>
+                      <td className="py-3.5 pr-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                            style={{ background: "linear-gradient(135deg, #2563eb, #4361ee)" }}
+                          >
+                            {admin.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-semibold" style={{ color: "#1a1d2e" }}>{admin.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 pr-4 text-sm" style={{ color: "#64748b" }}>{admin.email}</td>
+                      <td className="py-3.5 pr-4 text-sm" style={{ color: "#94a3b8" }}>
+                        {new Date(admin.createdAt).toLocaleDateString("id-ID", {
+                          day: "numeric", month: "short", year: "numeric"
+                        })}
+                      </td>
+                      <td className="py-3.5">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEdit(admin)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-blue-50"
+                          >
+                            <Edit2 className="w-4 h-4" style={{ color: "#4361ee" }} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(admin)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" style={{ color: "#dc2626" }} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Modal */}
+      {/* Modal Tambah / Edit */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4" style={{ color: "#1a1d2e" }}>
-              {editingAdmin ? "Edit Admin" : "Tambah Admin Baru"}
-            </h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xl font-bold" style={{ color: "#1a1d2e" }}>
+                {editing ? "Edit Admin" : "Tambah Admin Baru"}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {error && (
+              <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: "#fee2e2", color: "#dc2626" }}>
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>Nama Lengkap</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>NIDN</label>
-                <input
-                  type="text"
-                  value={formData.nidn}
-                  onChange={(e) => setFormData({ ...formData, nidn: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>NIP</label>
-                <input
-                  type="text"
-                  value={formData.nip}
-                  onChange={(e) => setFormData({ ...formData, nip: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: "#64748b" }}>
-                  Password {editingAdmin && "(kosongkan jika tidak ingin mengubah)"}
+                <label className="block text-sm font-semibold mb-1.5" style={{ color: "#374151" }}>
+                  Nama Lengkap <span style={{ color: "#dc2626" }}>*</span>
                 </label>
                 <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  required={!editingAdmin}
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Nama Admin Prodi"
+                  required
+                  className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
+                  style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", color: "#1a1d2e" }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "#4361ee"; e.currentTarget.style.background = "#fff"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "#f8fafc"; }}
                 />
               </div>
-              <div className="flex gap-3 pt-2">
+
+              <div>
+                <label className="block text-sm font-semibold mb-1.5" style={{ color: "#374151" }}>
+                  Email Login <span style={{ color: "#dc2626" }}>*</span>
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="nama@admin.uns.ac.id"
+                  required
+                  className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
+                  style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", color: "#1a1d2e" }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "#4361ee"; e.currentTarget.style.background = "#fff"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "#f8fafc"; }}
+                />
+                <p className="text-xs mt-1" style={{ color: "#94a3b8" }}>Harus menggunakan domain @admin.uns.ac.id</p>
+              </div>
+
+              {!editing && (
+                <div className="p-3 rounded-xl text-xs" style={{ background: "#f0fdf4", color: "#059669" }}>
+                  🔑 Password default: <strong>password123</strong> — bisa diubah setelah login
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    resetForm();
-                  }}
-                  className="flex-1 px-4 py-2 rounded-lg border font-medium"
-                  style={{ color: "#64748b", borderColor: "#e2e8f0" }}
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#f1f5f9", color: "#64748b" }}
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 rounded-lg text-white font-semibold"
+                  disabled={saving}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
                   style={{ background: "linear-gradient(135deg, #4361ee, #7c3aed)" }}
                 >
-                  {editingAdmin ? "Update" : "Tambah"}
+                  {saving ? "Menyimpan..." : editing ? "Update" : "Tambah Admin"}
                 </button>
               </div>
             </form>

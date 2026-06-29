@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { GraduationCap, Mail, Lock, ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +35,9 @@ export default function LoginPage() {
         return;
       }
 
-      // Redirect to appropriate dashboard
-      router.push(data.redirectPath);
+      // Redirect to appropriate dashboard — use full navigation so cookies are
+      // committed before the server-side dashboard layout reads them.
+      window.location.href = data.redirectPath;
     } catch (error) {
       console.error('Login error:', error);
       setError('Terjadi kesalahan saat login');
@@ -72,7 +74,7 @@ export default function LoginPage() {
             Platform terintegrasi untuk pengelolaan capaian pembelajaran lulusan Program Studi Teknik Industri UNS.
           </p>
           <div className="flex gap-3 flex-wrap pt-2">
-            {["Kaprodi", "Admin Prodi", "Dosen", "Mahasiswa"].map((r) => (
+            {["Kaprodi", "Admin Prodi", "Dosen", "Mahasiswa", "Penjaminan Mutu"].map((r) => (
               <span key={r} className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}>
                 {r}
               </span>
@@ -105,7 +107,7 @@ export default function LoginPage() {
           <div>
             <h2 className="text-3xl font-extrabold" style={{ color: "#1a1d2e" }}>Selamat datang!</h2>
             <p className="mt-2 text-sm" style={{ color: "#94a3b8" }}>
-              Masuk menggunakan akun SSO UNS Anda untuk melanjutkan.
+              Masuk menggunakan akun institusi UNS Anda. Domain email menentukan akses Anda secara otomatis.
             </p>
           </div>
 
@@ -124,6 +126,7 @@ export default function LoginPage() {
                 <div className="relative">
                   <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: "#94a3b8" }} />
                   <input
+                    ref={emailRef}
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -142,6 +145,7 @@ export default function LoginPage() {
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: "#94a3b8" }} />
                   <input
+                    ref={passwordRef}
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -177,10 +181,11 @@ export default function LoginPage() {
               <p className="text-xs font-bold text-center mb-3 uppercase tracking-wider" style={{ color: "#94a3b8" }}>Akun Demo</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { role: "Kaprodi", email: "kaprodi@staff.uns.ac.id", color: "#7c3aed", bg: "#ede9fe" },
-                  { role: "Admin", email: "admin@staff.uns.ac.id", color: "#2563eb", bg: "#dbeafe" },
-                  { role: "Dosen", email: "dosen@staff.uns.ac.id", color: "#d97706", bg: "#fef3c7" },
-                  { role: "Mahasiswa", email: "mhs@student.uns.ac.id", color: "#059669", bg: "#d1fae5" },
+                  { role: "Kaprodi", email: "wakhidjauhari@kaprodi.uns.ac.id", color: "#7c3aed", bg: "#ede9fe", border: "#c4b5fd" },
+                  { role: "Admin", email: "budi@admin.uns.ac.id", color: "#2563eb", bg: "#dbeafe", border: "#93c5fd" },
+                  { role: "Dosen", email: "joko.widodo@staff.uns.ac.id", color: "#d97706", bg: "#fef3c7", border: "#fde68a" },
+                  { role: "Mahasiswa", email: "aditya@student.uns.ac.id", color: "#059669", bg: "#d1fae5", border: "#6ee7b7" },
+                  { role: "Penjaminan Mutu", email: "ratna@jamu.uns.ac.id", color: "#0891b2", bg: "#cffafe", border: "#a5f3fc" },
                 ].map((acc) => (
                   <button
                     key={acc.role}
@@ -188,18 +193,26 @@ export default function LoginPage() {
                     onClick={() => {
                       setEmail(acc.email);
                       setPassword('password123');
+                      // Force native input value update for cross-device compatibility
+                      const nativeInputSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                      if (emailRef.current && nativeInputSetter) {
+                        nativeInputSetter.call(emailRef.current, acc.email);
+                        emailRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+                      }
+                      if (passwordRef.current && nativeInputSetter) {
+                        nativeInputSetter.call(passwordRef.current, 'password123');
+                        passwordRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+                      }
                     }}
-                    className="text-left p-2.5 rounded-xl transition-all"
-                    style={{ background: acc.bg, border: `1px solid ${acc.bg}` }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.border = `1px solid ${acc.color}`; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.border = `1px solid ${acc.bg}`; }}
+                    className="text-left p-2.5 rounded-xl transition-all select-none active:scale-95 active:opacity-80"
+                    style={{ background: acc.bg, border: `1.5px solid ${acc.border}`, WebkitTapHighlightColor: "transparent", cursor: "pointer" }}
                   >
                     <p className="text-xs font-bold" style={{ color: acc.color }}>{acc.role}</p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: "#64748b" }}>{acc.email}</p>
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-center mt-3" style={{ color: "#cbd5e1" }}>Klik kartu untuk isi email & password otomatis (password: password123)</p>
+              <p className="text-xs text-center mt-3" style={{ color: "#cbd5e1" }}>Tap kartu → lalu klik Masuk Sistem</p>
             </div>
           </div>
         </div>

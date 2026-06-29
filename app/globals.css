@@ -45,6 +45,11 @@ body {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 /* ============================================
    SIDEBAR STYLES
    ============================================ */
@@ -183,4 +188,78 @@ body {
 
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease forwards;
+}
+
+/* ============================================
+   MOBILE / TOUCH SUPPORT
+   ============================================ */
+
+/* Remove tap highlight on all interactive elements */
+button, a, input, select, textarea, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Ensure buttons/links have minimum touch target size (44x44px recommended) */
+button, a {
+  min-height: 36px;
+}
+
+/* Prevent text selection on buttons */
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Better touch scrolling */
+.overflow-y-auto, .overflow-x-auto, .overflow-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Active state feedback for touch */
+button:active, a:active {
+  opacity: 0.85;
+}
+
+/* Fix 100vh issue on mobile browsers (address bar) */
+.h-screen {
+  height: 100dvh;
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Better table scrolling on mobile */
+@media screen and (max-width: 768px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ============================================
+   HIDE NEXT.JS DEV OVERLAY (all devices)
+   ============================================ */
+nextjs-portal,
+#nextjs__container_errors_label,
+#nextjs__container_errors_desc,
+#nextjs__container_build_error_label,
+[data-nextjs-dialog],
+[data-nextjs-dialog-backdrop],
+[data-nextjs-toast],
+.__next-error-overlay,
+#__next-build-watcher {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
