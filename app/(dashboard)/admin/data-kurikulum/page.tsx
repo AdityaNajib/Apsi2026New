@@ -494,7 +494,11 @@ export default function AdminDataKurikulumPage() {
                     </div>
                   )}
                   <p className="text-xs mt-1" style={{ color: "#94a3b8" }}>
-                    Format: {activeTab === "cpl" ? `${KODE_EXAMPLES.cpl}, ${KODE_EXAMPLES.cpl.replace("1","2")}` : activeTab === "pi" ? `${KODE_EXAMPLES.pi}, ${KODE_EXAMPLES.pi.replace("1","2")}` : `${KODE_EXAMPLES.cpmk}, ${KODE_EXAMPLES.cpmk.replace("1","2")}`}
+                    {activeTab === "cpl"
+                      ? `Format: ${KODE_EXAMPLES.cpl}, ${KODE_EXAMPLES.cpl.replace("1","2")}`
+                      : activeTab === "pi"
+                      ? `Format: ${KODE_EXAMPLES.pi}, ${KODE_EXAMPLES.pi.replace("1","2")}`
+                      : "Format bebas, contoh: MO-1, APK-1, EKOTEK-3, K3-1"}
                   </p>
                 </div>
               )}

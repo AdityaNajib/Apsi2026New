@@ -4,19 +4,19 @@
  * Format yang diizinkan:
  *   CPL  : CPL-{angka}          contoh: CPL-1, CPL-12
  *   PI   : I-{angka}            contoh: I-1, I-12
- *   CPMK : CPMK-{angka}         contoh: CPMK-1, CPMK-12
+ *   CPMK : bebas (huruf/angka/tanda hubung), contoh: MO-1, APK-1, EKOTEK-3, K3-1
  */
 
 export const KODE_PATTERNS = {
   cpl:  /^CPL-\d+$/i,
   pi:   /^I-\d+$/i,
-  cpmk: /^CPMK-\d+$/i,
+  cpmk: /^[A-Za-z0-9][A-Za-z0-9_-]*$/,   // bebas: huruf, angka, tanda hubung, underscore
 } as const;
 
 export const KODE_EXAMPLES = {
   cpl:  "CPL-1",
   pi:   "I-1",
-  cpmk: "CPMK-1",
+  cpmk: "MO-1",
 } as const;
 
 export const KODE_LABELS = {
@@ -35,6 +35,9 @@ export function validateKode(type: KodeType, kode: string): string | null {
   if (!trimmed) return `Kode ${KODE_LABELS[type]} tidak boleh kosong`;
 
   if (!KODE_PATTERNS[type].test(trimmed)) {
+    if (type === "cpmk") {
+      return `Kode CPMK tidak valid. Gunakan huruf, angka, dan tanda hubung (contoh: MO-1, APK-1, EKOTEK-3)`;
+    }
     return `Format kode ${KODE_LABELS[type]} tidak valid. Gunakan format: ${KODE_EXAMPLES[type]} (contoh: ${KODE_EXAMPLES[type]}, ${KODE_EXAMPLES[type].replace("1", "2")})`;
   }
   return null;
