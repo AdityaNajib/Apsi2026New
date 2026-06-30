@@ -23,9 +23,10 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash('password123', 10);
-    // Validasi angkatan: 4 tahun terakhir + tahun berjalan
+    // Validasi angkatan: 5 tahun terakhir + tahun berjalan (dynamic)
     const currentYear = new Date().getFullYear();
     const validAngkatan = [
+      String(currentYear - 4),
       String(currentYear - 3),
       String(currentYear - 2),
       String(currentYear - 1),

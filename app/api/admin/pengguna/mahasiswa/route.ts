@@ -44,16 +44,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email mahasiswa harus menggunakan domain @student.uns.ac.id' }, { status: 400 });
     }
 
-    // Validasi angkatan: 4 tahun terakhir + tahun berjalan
+    // Validasi angkatan: 5 tahun terakhir + tahun berjalan (dynamic)
     const currentYear = new Date().getFullYear();
     const validAngkatan = [
+      String(currentYear - 4),
       String(currentYear - 3),
       String(currentYear - 2),
       String(currentYear - 1),
       String(currentYear),
     ];
     if (!validAngkatan.includes(angkatan)) {
-      return NextResponse.json({ error: `Angkatan tidak valid. Harus antara ${validAngkatan[0]} - ${validAngkatan[3]}` }, { status: 400 });
+      return NextResponse.json({ error: `Angkatan tidak valid. Harus antara ${validAngkatan[0]} - ${validAngkatan[4]}` }, { status: 400 });
     }
 
     // Cek duplikat email

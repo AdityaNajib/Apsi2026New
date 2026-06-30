@@ -89,6 +89,7 @@ export default function LaporanCPLContent({ role }: Props) {
               className="px-4 py-2 rounded-xl border text-sm font-medium"
               style={{ borderColor: "#e2e8f0", color: "#64748b" }}>
               <option value="all">Semua Angkatan</option>
+              <option value="2026">Angkatan 2026</option>
               <option value="2025">Angkatan 2025</option>
               <option value="2024">Angkatan 2024</option>
               <option value="2023">Angkatan 2023</option>
