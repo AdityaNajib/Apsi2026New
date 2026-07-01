@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { getActiveSemester } from '@/lib/semesterUtils';
 
 export async function GET() {
   try {
@@ -18,6 +19,7 @@ export async function GET() {
         pengampu: {
           include: {
             kelas: {
+              where: { semester: getActiveSemester() },
               include: {
                 mataKuliah: true,
                 krs: {

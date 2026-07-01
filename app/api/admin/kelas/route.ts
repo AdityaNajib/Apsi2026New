@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getActiveSemester } from '@/lib/semesterUtils';
 
 // GET all kelas with full detail
 export async function GET(request: NextRequest) {
@@ -7,7 +8,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const mkId = searchParams.get('mkId');
 
-    const whereClause = mkId ? { mkId } : {};
+    const activeSemester = getActiveSemester();
+    const whereClause: any = mkId
+      ? { mkId, semester: activeSemester }
+      : { semester: activeSemester };
 
     const kelasList = await prisma.kelas.findMany({
       where: whereClause,
